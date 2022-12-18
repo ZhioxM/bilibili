@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zx.bilibili.mapper.AuthRoleElementOperationMapper">
+  <resultMap id="BaseResultMap" type="com.zx.bilibili.domain.AuthRoleElementOperation">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="roleId" jdbcType="BIGINT" property="roleId" />
+    <result column="elementOperationId" jdbcType="BIGINT" property="elementOperationId" />
+    <result column="createTIme" jdbcType="TIMESTAMP" property="createTIme" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, roleId, elementOperationId, createTIme
+  </sql>
+  <select id="selectByExample" parameterType="com.zx.bilibili.domain.AuthRoleElementOperationExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_auth_role_element_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_auth_role_element_operation
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_auth_role_element_operation
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.zx.bilibili.domain.AuthRoleElementOperationExample">
+    delete from t_auth_role_element_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.zx.bilibili.domain.AuthRoleElementOperation">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into t_auth_role_element_operation (roleId, elementOperationId, createTIme
+      )
+    values (#{roleId,jdbcType=BIGINT}, #{elementOperationId,jdbcType=BIGINT}, #{createTIme,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zx.bilibili.domain.AuthRoleElementOperation">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into t_auth_role_element_operation
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        roleId,
+      </if>
+      <if test="elementOperationId != null">
+        elementOperationId,
+      </if>
+      <if test="createTIme != null">
+        createTIme,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="elementOperationId != null">
+        #{elementOperationId,jdbcType=BIGINT},
+      </if>
+      <if test="createTIme != null">
+        #{createTIme,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.zx.bilibili.domain.AuthRoleElementOperationExample" resultType="java.lang.Integer">
+    select count(*) from t_auth_role_element_operation
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_auth_role_element_operation
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.roleId != null">
+        roleId = #{record.roleId,jdbcType=BIGINT},
+      </if>
+      <if test="record.elementOperationId != null">
+        elementOperationId = #{record.elementOperationId,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTIme != null">
+        createTIme = #{record.createTIme,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_auth_role_element_operation
+    set id = #{record.id,jdbcType=BIGINT},
+      roleId = #{record.roleId,jdbcType=BIGINT},
+      elementOperationId = #{record.elementOperationId,jdbcType=BIGINT},
+      createTIme = #{record.createTIme,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zx.bilibili.domain.AuthRoleElementOperation">
+    update t_auth_role_element_operation
+    <set>
+      <if test="roleId != null">
+        roleId = #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="elementOperationId != null">
+        elementOperationId = #{elementOperationId,jdbcType=BIGINT},
+      </if>
+      <if test="createTIme != null">
+        createTIme = #{createTIme,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zx.bilibili.domain.AuthRoleElementOperation">
+    update t_auth_role_element_operation
+    set roleId = #{roleId,jdbcType=BIGINT},
+      elementOperationId = #{elementOperationId,jdbcType=BIGINT},
+      createTIme = #{createTIme,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

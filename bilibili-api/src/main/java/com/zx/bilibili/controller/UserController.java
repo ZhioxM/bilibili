@@ -4,29 +4,23 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjUtil;
+import com.zx.bilibili.common.api.CommonPage;
 import com.zx.bilibili.common.api.CommonResult;
-import com.zx.bilibili.constant.UserConstant;
-import com.zx.bilibili.domain.FollowingGroup;
 import com.zx.bilibili.domain.User;
 import com.zx.bilibili.domain.UserFollowing;
 import com.zx.bilibili.domain.UserInfo;
-import com.zx.bilibili.service.FollowingGroupService;
 import com.zx.bilibili.service.UserFollowingService;
 import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.util.RSAUtil;
-import com.zx.bilibili.vo.UserFollowedVo;
-import com.zx.bilibili.vo.UserFollowingVo;
+import com.zx.bilibili.vo.UserInfoVo;
 import com.zx.bilibili.vo.UserVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -41,9 +35,6 @@ public class UserController {
 
     @Autowired
     private UserFollowingService userFollowingService;
-
-    @Autowired
-    private FollowingGroupService followingGroupService;
 
     @ApiOperation("获取公钥，用于前端RSA加密(对密码进行加密)")
     @GetMapping("/rsa-pks")
@@ -110,21 +101,31 @@ public class UserController {
         return CommonResult.success(null);
     }
 
-    // @GetMapping("/user-infos")
-    // public JsonResponse<PageResult<UserInfo>> pageListUserInfos(@RequestParam Integer no, @RequestParam Integer size, String nick){
-    //     Long userId = userSupport.getCurrentUserId();
-    //     JSONObject params = new JSONObject();
-    //     params.put("no", no);
-    //     params.put("size", size);
-    //     params.put("nick", nick);
-    //     params.put("userId", userId);
-    //     PageResult<UserInfo> result = userService.pageListUserInfos(params);
-    //     if(result.getTotal() > 0){
-    //         List<UserInfo> checkedUserInfoList = userFollowingService.checkFollowingStatus(result.getList(), userId);
-    //         result.setList(checkedUserInfoList);
-    //     }
-    //     return new JsonResponse<>(result);
-    // }
+    @ApiOperation("分页查询所有用户信息")
+    @GetMapping("/user-infos")
+    public CommonResult<CommonPage<UserInfoVo>> pageListUserInfos(@RequestParam(defaultValue = "1") Integer pageNum,
+                                                                @RequestParam(defaultValue = "10") Integer pageSize,
+                                                                String nick){
+        Long userId = StpUtil.getLoginIdAsLong();
+        List<UserInfo> userInfoList = userService.listUserInfo(pageNum, pageSize, nick);
+        Set<Long> followingId = userFollowingService.getUserFollowing(userId).stream().map(UserFollowing::getFollowingId).collect(Collectors.toSet());
+        List<UserInfoVo> userInfoVoList = userInfoList.stream().map((o) -> {
+            // 判断是否回关(TODO 优化，可以先一次将用户的关注列表全部查出来，再判断是当前用户有没有关注过这位用户)
+            // UserFollowing db = userFollowingService.getUserFollowed(userId, o.getUserId());
+            boolean followed = followingId.contains(o.getUserId());
+            return new UserInfoVo(o.getId(),
+                                  o.getUserId(),
+                                  o.getNick(),
+                                  o.getAvatar(),
+                                  o.getGender(),
+                                  o.getBirth(),
+                                  o.getCreateTime(),
+                                  o.getUpdateTime(),
+                                  o.getSign(),
+                                  followed);
+        }).collect(Collectors.toList());
+        return CommonResult.success(CommonPage.restPage(userInfoVoList));
+    }
 
     // @PostMapping("/user-dts")
     // public CommonResult<Map<String, Object>> loginForDts(@RequestBody User user) throws Exception {
@@ -147,73 +148,5 @@ public class UserController {
         String refreshToken = request.getHeader("refreshToken");
         String accessToken = userService.refreshAccessToken(refreshToken);
         return CommonResult.success(accessToken);
-    }
-
-    @ApiOperation("获取用户的关注列表")
-    @SaCheckLogin
-    @GetMapping("/user-followings")
-    public CommonResult<List<UserFollowingVo>> getUserFollowings() {
-        List<UserFollowingVo> result = new ArrayList<>();
-        Long userId = StpUtil.getLoginIdAsLong();
-        List<UserFollowing> userFollowingList = userFollowingService.getUserFollowing(userId);
-        // 获取关注ID列表
-        Set<Long> followingIdSet = userFollowingList.stream().map(UserFollowing::getFollowingId).collect(Collectors.toSet());
-        // 所有关注的用户信息
-        List<UserInfo> allFollowingUserInfoList = userService.getUserInfoByUserIds(followingIdSet);
-        // 转化为键值对，后面用到
-        Map<Long, UserInfo> userInfoMap = allFollowingUserInfoList.stream().collect(Collectors.toMap(UserInfo::getUserId, Function.identity()));
-
-        // 全部关注
-        UserFollowingVo allFollowingVo = new UserFollowingVo();
-        allFollowingVo.setName(UserConstant.USER_FOLLOWING_GROUP_ALL_NAME);
-        allFollowingVo.setFollowingUserInfoList(allFollowingUserInfoList);
-        result.add(allFollowingVo);
-
-        // 分组关注
-        List<FollowingGroup> groupList = followingGroupService.getByUserId(userId);
-        // 遍历所有分组
-        for (FollowingGroup group : groupList) {
-            UserFollowingVo vo = new UserFollowingVo();
-            List<UserInfo> groupFollowingUserInfoList = new ArrayList<>();
-            for (UserFollowing userFollowing : userFollowingList) {
-                // 获取当前分组下的所有关注的用户ID，查询他们的信息
-                if (ObjUtil.equal(group.getId(), userFollowing.getGroupId())) {
-                    UserInfo followingUserInfo = userInfoMap.get(userFollowing.getFollowingId());
-                    groupFollowingUserInfoList.add(followingUserInfo);
-                }
-            }
-            vo.setUserId(group.getUserId());
-            vo.setId(group.getId());
-            vo.setType(group.getType());
-            vo.setName(group.getName());
-            vo.setFollowingUserInfoList(groupFollowingUserInfoList);
-            result.add(vo);
-        }
-        return CommonResult.success(result);
-    }
-
-    @ApiOperation("获取用户的粉丝列表")
-    @SaCheckLogin
-    @GetMapping("/user-fans")
-    public CommonResult<List<UserFollowedVo>> getUserFollowed() {
-        List<UserFollowedVo> result = new ArrayList<>();
-        Long userId = StpUtil.getLoginIdAsLong();
-        List<UserFollowing> followedList = userFollowingService.getUserFollowed(userId);
-        // 获取粉丝ID
-        Set<Long> followedIdSet = followedList.stream().map(UserFollowing::getUserId).collect(Collectors.toSet());
-        for (Long followedId : followedIdSet) {
-            UserFollowedVo vo = new UserFollowedVo();
-            vo.setUserId(followedId);
-            // 查询粉丝信息
-            vo.setUserInfo(userService.getUserInfo(followedId));
-            // 判断自己有没有回关这位粉丝
-            UserFollowing db = userFollowingService.getUserFollowed(userId, followedId);
-            if (ObjUtil.isNotEmpty(db)) {
-                vo.setFollowed(true);
-            }
-            result.add(vo);
-        }
-        return CommonResult.success(result);
-
     }
 }

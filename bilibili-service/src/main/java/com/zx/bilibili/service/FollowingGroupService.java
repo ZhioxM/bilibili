@@ -19,4 +19,8 @@ public interface FollowingGroupService {
      * @return
      */
     List<FollowingGroup> getByUserId(Long userId);
+
+    Long addUserFollowingGroup(FollowingGroup followingGroup);
+
+    List<FollowingGroup> getUserFollowingGroups(Long userId);
 }

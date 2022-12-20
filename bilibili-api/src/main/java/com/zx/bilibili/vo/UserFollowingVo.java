@@ -6,13 +6,14 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * 用户关注VO
  * @Author: Mzx
  * @Date: 2022/12/18 20:37
  */
 public class UserFollowingVo {
     private Long id; // 原本起名叫groupId, 为了与前端匹配，所以保留原本的
 
-    private Long userId;
+    private Long userId; // 这是有用的，与用户自定义分组有关
 
     private String name; // 原本起名叫groupName, 为了与前端匹配
 

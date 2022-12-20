@@ -1,5 +1,6 @@
 package com.zx.bilibili.service;
 
+import com.zx.bilibili.domain.FollowingGroup;
 import com.zx.bilibili.domain.UserFollowing;
 
 import java.util.List;

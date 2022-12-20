@@ -1,10 +1,10 @@
 package com.zx.bilibili.service;
 
 import cn.dev33.satoken.stp.StpUtil;
-import cn.dev33.satoken.util.SaResult;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.github.pagehelper.PageHelper;
 import com.mysql.cj.util.StringUtils;
 import com.zx.bilibili.common.api.CommonException;
 import com.zx.bilibili.constant.UserConstant;
@@ -40,25 +40,25 @@ public class UserService {
     @Transactional
     public void addUser(User user) {
         String phone = user.getPhone();
-        if(StrUtil.isBlankIfStr(phone)) {
+        if (StrUtil.isBlankIfStr(phone)) {
             throw new CommonException("手机号不能为空");
         }
         User dbUser = getUserByPhone(phone);
-        if(ObjUtil.isNotEmpty(dbUser)) {
+        if (ObjUtil.isNotEmpty(dbUser)) {
             throw new CommonException("该手机号已注册");
         }
         Date now = new Date();
         String salt = String.valueOf(now.getTime());
         // 前端传过来的是公钥加密后的密码
         String password = user.getPassword();
-        if(StrUtil.isBlankIfStr(password)) {
+        if (StrUtil.isBlankIfStr(password)) {
             throw new CommonException("密码不能为空");
         }
         // RSA私钥解密获取明文密码
         String rawPassword;
-        try{
+        try {
             rawPassword = RSAUtil.decrypt(password);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ConditionException("密码解密失败！");
         }
         // 对明文密码进行摘要后存入数据库
@@ -83,7 +83,7 @@ public class UserService {
         UserExample userExample = new UserExample();
         userExample.createCriteria().andPhoneEqualTo(phone);
         List<User> users = userMapper.selectByExample(userExample);
-        if(CollectionUtil.isEmpty(users)) {
+        if (CollectionUtil.isEmpty(users)) {
             return null;
         }
         return users.get(0);
@@ -104,7 +104,7 @@ public class UserService {
         }
         // 数据库中存储的是md5后的密码，是不可逆的；要验证密码是否正确，只能对前端的传过来的密码重做一次摘要，比较摘要后的产物是否一致
         String md5Pwd = MD5Util.sign(rawPwd, dbUser.getSalt(), "UTF-8");
-        if(StrUtil.equals(md5Pwd, dbUser.getPassword())) {
+        if (StrUtil.equals(md5Pwd, dbUser.getPassword())) {
             // 密码验证成功
             StpUtil.login(dbUser.getId());
         } else {
@@ -147,7 +147,7 @@ public class UserService {
     }
 
     public List<UserInfo> getUserInfoByUserIds(Set<Long> userIdList) {
-        if(CollectionUtil.isEmpty(userIdList)) {
+        if (CollectionUtil.isEmpty(userIdList)) {
             return new ArrayList<>();
         }
         UserInfoExample userInfoExample = new UserInfoExample();
@@ -191,4 +191,13 @@ public class UserService {
         return refreshTokens.get(0).getRefreshToken();
     }
 
+    public List<UserInfo> listUserInfo(Integer pageNum, Integer pageSize, String nick) {
+        PageHelper.startPage(pageNum, pageSize);
+        UserInfoExample userInfoExample = new UserInfoExample();
+        userInfoExample.setOrderByClause("id DESC");
+        if (StrUtil.isNotBlank(nick)) {
+            userInfoExample.createCriteria().andNickLike(nick);
+        }
+        return userInfoMapper.selectByExample(userInfoExample);
+    }
 }

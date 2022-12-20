@@ -1,6 +1,9 @@
 package com.zx.bilibili.vo;
 
 import com.zx.bilibili.domain.UserInfo;
+import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Date;
 
 /**
  * 用户粉丝VO
@@ -9,10 +12,7 @@ import com.zx.bilibili.domain.UserInfo;
  */
 public class UserFollowedVo {
     private Long userId; // 应该叫followedId才对，但是为了与前端匹配。没办法
-
-    private UserInfo userInfo;
-
-    private boolean followed; // 是否回关
+    private UserInfoVo userInfoVo;
 
     public Long getUserId() {
         return userId;
@@ -22,28 +22,11 @@ public class UserFollowedVo {
         this.userId = userId;
     }
 
-    public UserInfo getUserInfo() {
-        return userInfo;
+    public UserInfoVo getUserInfoVo() {
+        return userInfoVo;
     }
 
-    public void setUserInfo(UserInfo userInfo) {
-        this.userInfo = userInfo;
-    }
-
-    public boolean isFollowed() {
-        return followed;
-    }
-
-    public void setFollowed(boolean followed) {
-        this.followed = followed;
-    }
-
-    @Override
-    public String toString() {
-        return "UserFollowedVo{" +
-                "followingId=" + userId +
-                ", userInfo=" + userInfo +
-                ", followed=" + followed +
-                '}';
+    public void setUserInfoVo(UserInfoVo userInfoVo) {
+        this.userInfoVo = userInfoVo;
     }
 }

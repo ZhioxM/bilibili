@@ -1,7 +1,7 @@
 package com.zx.bilibili.support;
 
 import com.zx.bilibili.exception.ConditionException;
-import com.zx.bilibili.service.UserService;
+import com.zx.bilibili.service.impl.UserServiceImpl;
 import com.zx.bilibili.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 public class UserSupport {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     public Long getCurrentUserId() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

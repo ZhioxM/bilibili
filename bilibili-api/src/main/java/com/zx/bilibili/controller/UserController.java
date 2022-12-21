@@ -3,7 +3,6 @@ package com.zx.bilibili.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.util.ObjUtil;
 import com.zx.bilibili.common.api.CommonPage;
 import com.zx.bilibili.common.api.CommonResult;
 import com.zx.bilibili.domain.User;
@@ -127,19 +126,12 @@ public class UserController {
         return CommonResult.success(CommonPage.restPage(userInfoVoList));
     }
 
-    // @PostMapping("/user-dts")
-    // public CommonResult<Map<String, Object>> loginForDts(@RequestBody User user) throws Exception {
-    //     Map<String, Object> map = userService.loginForDts(user);
-    //     return CommonResult.success(map);
-    // }
-
     @ApiOperation("退出登录")
     @SaCheckLogin
     @DeleteMapping("/refresh-tokens")
     public CommonResult<?> logout(HttpServletRequest request) {
-        String refreshToken = request.getHeader("refreshToken");
         Long userId = StpUtil.getLoginIdAsLong();
-        userService.logout(refreshToken, userId);
+        StpUtil.logout(userId);
         return CommonResult.success(null);
     }
 

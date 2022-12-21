@@ -2,18 +2,15 @@ package com.zx.bilibili.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
 import com.zx.bilibili.common.api.CommonException;
 import com.zx.bilibili.constant.UserConstant;
 import com.zx.bilibili.domain.FollowingGroup;
 import com.zx.bilibili.domain.User;
 import com.zx.bilibili.domain.UserFollowing;
 import com.zx.bilibili.domain.UserFollowingExample;
-import com.zx.bilibili.mapper.FollowingGroupMapper;
 import com.zx.bilibili.mapper.UserFollowingMapper;
 import com.zx.bilibili.service.FollowingGroupService;
 import com.zx.bilibili.service.UserFollowingService;
-import com.zx.bilibili.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +31,7 @@ public class UserFollowingServiceImpl implements UserFollowingService {
     private FollowingGroupService followingGroupService;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Override
     @Transactional

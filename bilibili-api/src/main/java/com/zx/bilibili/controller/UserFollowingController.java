@@ -111,14 +111,22 @@ public class UserFollowingController {
             vo.setUserId(followedId);
             // 查询粉丝信息
             UserInfo userInfo = userService.getUserInfo(followedId);
-            UserInfoVo userInfoVo = new UserInfoVo();
-            copyProperty(userInfoVo, userInfo);
-            vo.setUserInfoVo(userInfoVo);
             // 判断自己有没有回关这位粉丝
             UserFollowing db = userFollowingService.getUserFollowed(userId, followedId);
-            if (ObjUtil.isNotEmpty(db)) {
-                vo.getUserInfoVo().setFollowed(true);
-            }
+            boolean followed = ObjUtil.isNotEmpty(db);
+            UserInfoVo userInfoVo = new UserInfoVo(
+                    userInfo.getId(),
+                    userInfo.getUserId(),
+                    userInfo.getNick(),
+                    userInfo.getAvatar(),
+                    userInfo.getGender(),
+                    userInfo.getBirth(),
+                    userInfo.getCreateTime(),
+                    userInfo.getUpdateTime(),
+                    userInfo.getSign(),
+                    followed
+            );
+            vo.setUserInfoVo(userInfoVo);
             result.add(vo);
         }
         return CommonResult.success(result);
@@ -143,17 +151,5 @@ public class UserFollowingController {
         Long userId = StpUtil.getLoginIdAsLong();
         List<FollowingGroup> list = followingGroupService.getUserFollowingGroups(userId);
         return CommonResult.success(list);
-    }
-
-    private void copyProperty(UserInfoVo userInfoVo, UserInfo userInfo) {
-        userInfoVo.setId(userInfo.getId());
-        userInfoVo.setUserId(userInfo.getUserId());
-        userInfoVo.setAvatar(userInfo.getAvatar());
-        userInfoVo.setBirth(userInfo.getBirth());
-        userInfoVo.setGender(userInfo.getGender());
-        userInfoVo.setNick(userInfo.getNick());
-        userInfoVo.setSign(userInfo.getSign());
-        userInfoVo.setCreateTime(userInfo.getCreateTime());
-        userInfoVo.setUpdateTime(userInfo.getUpdateTime());
     }
 }

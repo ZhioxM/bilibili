@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  * @Date: 2022/12/13 22:27
  */
 @RestController
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
@@ -43,14 +44,14 @@ public class UserController {
     }
 
     @ApiOperation("用户注册")
-    @PostMapping("/users")
+    @PostMapping("/register")
     public CommonResult<String> addUser(@RequestBody User user) {
         userService.addUser(user);
         return CommonResult.success(null);
     }
 
     @ApiOperation("用户登录")
-    @PostMapping("/user-tokens")
+    @PostMapping("/login")
     public CommonResult<String> login(@RequestBody User user) throws Exception {
         // 1. 先登录上
         userService.login(user);
@@ -62,7 +63,7 @@ public class UserController {
 
     @ApiOperation("查询当前用户信息")
     @SaCheckLogin
-    @GetMapping("/users")
+    @GetMapping("/info")
     public CommonResult<UserVo> getUserInfo() {
         long userId = StpUtil.getLoginIdAsLong();
         User user = userService.getUser(userId);
@@ -79,20 +80,20 @@ public class UserController {
         return CommonResult.success(userVo);
     }
 
-    @ApiOperation("更新当前用户信息")
+    @ApiOperation("修改用户密码")
     @SaCheckLogin
-    @PutMapping("/users")
+    @PutMapping("/pwd")
     public CommonResult<String> updateUsers(@RequestBody User user) throws Exception {
         // 获取当前的登录ID
         long loginId = StpUtil.getLoginIdAsLong();
         user.setId(loginId);
-        userService.updateUsers(user);
+        userService.updateUserPwd(user);
         return CommonResult.success(null);
     }
 
     @ApiOperation("更新当前用户的详细信息")
     @SaCheckLogin
-    @PutMapping("/user-infos")
+    @PutMapping("/info")
     public CommonResult<String> updateUserInfos(@RequestBody UserInfo userInfo) {
         long loginId = StpUtil.getLoginIdAsLong();
         userInfo.setUserId(loginId);
@@ -101,7 +102,7 @@ public class UserController {
     }
 
     @ApiOperation("分页查询所有用户信息")
-    @GetMapping("/user-infos")
+    @GetMapping("/info/list")
     public CommonResult<CommonPage<UserInfoVo>> pageListUserInfos(@RequestParam(defaultValue = "1") Integer pageNum,
                                                                 @RequestParam(defaultValue = "10") Integer pageSize,
                                                                 String nick){
@@ -128,17 +129,10 @@ public class UserController {
 
     @ApiOperation("退出登录")
     @SaCheckLogin
-    @DeleteMapping("/refresh-tokens")
+    @DeleteMapping("/logout")
     public CommonResult<?> logout(HttpServletRequest request) {
         Long userId = StpUtil.getLoginIdAsLong();
         StpUtil.logout(userId);
         return CommonResult.success(null);
-    }
-
-    @PostMapping("/access-tokens")
-    public CommonResult<String> refreshAccessToken(HttpServletRequest request) throws Exception {
-        String refreshToken = request.getHeader("refreshToken");
-        String accessToken = userService.refreshAccessToken(refreshToken);
-        return CommonResult.success(accessToken);
     }
 }

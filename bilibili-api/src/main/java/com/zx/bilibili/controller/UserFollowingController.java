@@ -46,7 +46,7 @@ public class UserFollowingController {
 
     @ApiOperation("添加用户关注")
     @SaCheckLogin
-    @PostMapping("/user-followings")
+    @PostMapping("/follow")
     public CommonResult<String> addUserFollowings(@RequestBody UserFollowing userFollowing){
         Long userId = StpUtil.getLoginIdAsLong();
         userFollowing.setUserId(userId);
@@ -56,7 +56,7 @@ public class UserFollowingController {
 
     @ApiOperation("获取用户的关注列表")
     @SaCheckLogin
-    @GetMapping("/user-followings")
+    @GetMapping("/follow/list")
     public CommonResult<List<UserFollowingVo>> getUserFollowings() {
         List<UserFollowingVo> result = new ArrayList<>();
         Long userId = StpUtil.getLoginIdAsLong();
@@ -99,7 +99,7 @@ public class UserFollowingController {
 
     @ApiOperation("获取用户的粉丝列表")
     @SaCheckLogin
-    @GetMapping("/user-fans")
+    @GetMapping("/fan/list")
     public CommonResult<List<UserFollowedVo>> getUserFollowed() {
         List<UserFollowedVo> result = new ArrayList<>();
         Long userId = StpUtil.getLoginIdAsLong();
@@ -136,7 +136,7 @@ public class UserFollowingController {
 
     @ApiOperation("添加用户关注分组")
     @SaCheckLogin
-    @PostMapping("/user-following-groups")
+    @PostMapping("/follow/group")
     public CommonResult<Long> addUserFlowingGroups(@RequestBody FollowingGroup followingGroup) {
         Long userId = StpUtil.getLoginIdAsLong();
         followingGroup.setUserId(userId);
@@ -146,7 +146,7 @@ public class UserFollowingController {
 
     @ApiOperation("获取用户关注分组")
     @SaCheckLogin
-    @GetMapping("/user-following-groups")
+    @GetMapping("/follow/group/list")
     public CommonResult<List<FollowingGroup>> getUserFollowingGroups(){
         Long userId = StpUtil.getLoginIdAsLong();
         List<FollowingGroup> list = followingGroupService.getUserFollowingGroups(userId);

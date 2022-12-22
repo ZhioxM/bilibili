@@ -24,7 +24,7 @@ public interface UserService {
 
     UserInfo getUserInfo(Long userId);
 
-    void updateUsers(User user) throws Exception;
+    void updateUserPwd(User user) throws Exception;
 
     void updateUserInfos(UserInfo userInfo);
 

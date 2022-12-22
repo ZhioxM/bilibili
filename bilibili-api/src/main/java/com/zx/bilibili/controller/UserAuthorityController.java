@@ -20,7 +20,7 @@ public class UserAuthorityController {
 
     @ApiOperation("获取用户权限列表")
     @SaCheckLogin
-    @GetMapping("/user-authorities")
+    @GetMapping("/user/authorities")
     public CommonResult<UserAuthority> getUserAuthorities() {
         Long userId = StpUtil.getLoginIdAsLong();
         UserAuthority userAuthorities = userAuthorityService.getUserAuthorities(userId);

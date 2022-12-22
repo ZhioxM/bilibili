@@ -28,7 +28,7 @@ public class FileController {
     // TODO 怎么控制序号的问题？如果分片请求不是按序到达的怎么办？
     // 查查资料，看看人家是怎么解决的
     // 我的一个思路，前端通过一个请求将各个分片的序号、大小等信息等信息先全部发过来？
-    @PutMapping("/file-slices")
+    @PutMapping("/file/slices")
     public CommonResult<String> uploadFileBySlices(MultipartFile slice,
                                                    String fileMd5,
                                                    Integer sliceNo,

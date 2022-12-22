@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUsers(User user) throws Exception {
+    public void updateUserPwd(User user) throws Exception {
         Long id = user.getId();
         User dbUser = userMapper.selectByPrimaryKey(id);
         if (dbUser == null) {
@@ -166,19 +166,6 @@ public class UserServiceImpl implements UserService {
         userInfoExample.createCriteria().andUserIdIn(new ArrayList<>(userIdList));
         return userInfoMapper.selectByExample(userInfoExample);
     }
-
-    // public PageResult<UserInfo> pageListUserInfos(JSONObject params) {
-    //     Integer no = params.getInteger("no");
-    //     Integer size = params.getInteger("size");
-    //     params.put("start", (no-1)*size);
-    //     params.put("limit", size);
-    //     Integer total = userDao.pageCountUserInfos(params);
-    //     List<UserInfo> list = new ArrayList<>();
-    //     if(total > 0){
-    //         list = userDao.pageListUserInfos(params);
-    //     }
-    //     return new PageResult<>(total, list);
-    // }
 
     @Override
     public Map<String, Object> loginForDts(User user) throws Exception {

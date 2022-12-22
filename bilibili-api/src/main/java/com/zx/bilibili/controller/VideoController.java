@@ -8,14 +8,14 @@ import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.service.VideoService;
 import com.zx.bilibili.vo.VideoVo;
 import io.swagger.annotations.ApiOperation;
-import javafx.geometry.VerticalDirection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -52,5 +52,18 @@ public class VideoController {
     public CommonResult<CommonPage<Video>> listVideo(Integer pageNum, Integer pageSize, String area) {
         List<Video> videos = videoService.listVideos(pageNum, pageSize, area);
         return CommonResult.success(CommonPage.restPage(videos));
+    }
+
+    /**
+     * 虽然直接暴露视频文件在FastDFS上的路径给浏览器，浏览器可以自动采用分片下载。但是将资源的完整路径交给前端是危险的，因为有一些资源是会员专属的之类的
+     *
+     * @return
+     */
+    @ApiOperation("视频播放")
+    @SaCheckLogin
+    @GetMapping("/video")
+    public void loadVideo(HttpServletRequest request, HttpServletResponse response, String url) {
+        // 文件流数据通过原生Response对象返回
+        videoService.loadVideo(request, response, url);
     }
 }

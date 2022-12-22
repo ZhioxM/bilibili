@@ -173,15 +173,20 @@ public class FastDFSUtil {
     public void viewVideoOnlineBySlices(HttpServletRequest request,
                                         HttpServletResponse response,
                                         String path) throws Exception{
+        // 根据文件在文件服务器上的路径查询文件的所有信息
         FileInfo fileInfo = fastFileStorageClient.queryFileInfo(DEFAULT_GROUP, path);
+        // 文件总大小
         long totalFileSize = fileInfo.getFileSize();
+        // 文件在DFS上的完整请求路径
         String url = httpFdfsStorageAddr + path;
+        // 获取前端请求头
         Enumeration<String> headerNames = request.getHeaderNames();
         Map<String, Object> headers = new HashMap<>();
         while(headerNames.hasMoreElements()){
             String header = headerNames.nextElement();
             headers.put(header, request.getHeader(header));
         }
+        // 用于视频分片加载的请求头数据（Range）
         String rangeStr = request.getHeader("Range");
         String[] range;
         if(StringUtil.isNullOrEmpty(rangeStr)){
@@ -189,20 +194,24 @@ public class FastDFSUtil {
         }
         range = rangeStr.split("bytes=|-");
         long begin = 0;
-        if(range.length >= 2){
+        if (range.length >= 2) {
             begin = Long.parseLong(range[1]);
         }
-        long end = totalFileSize-1;
-        if(range.length >= 3){
+        long end = totalFileSize - 1;
+        if (range.length >= 3) {
             end = Long.parseLong(range[2]);
         }
         long len = (end - begin) + 1;
+
+        // 设置响应头
         String contentRange = "bytes " + begin + "-" + end + "/" + totalFileSize;
         response.setHeader("Content-Range", contentRange);
         response.setHeader("Accept-Ranges", "bytes");
         response.setHeader("Content-Type", "video/mp4");
-        response.setContentLength((int)len);
+        response.setContentLength((int) len);
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+        // 向DFS发送请求
         HttpUtil.get(url, headers, response);
     }
 

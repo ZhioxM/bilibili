@@ -45,6 +45,12 @@ public class VideoServiceImpl implements VideoService {
     private CollectionGroupMapper collectionGroupMapper;
 
     @Autowired
+    private VideoCoinMapper videoCoinMapper;
+
+    @Autowired
+    private UserCoinMapper userCoinMapper;
+
+    @Autowired
     private TransactionTemplate transactionTemplate;
 
     @Autowired
@@ -209,6 +215,73 @@ public class VideoServiceImpl implements VideoService {
         VideoCollectionExample ex = new VideoCollectionExample();
         ex.createCriteria().andUserIdEqualTo(userId).andVideoIdEqualTo(videoId);
         return videoCollectionMapper.selectByExample(ex);
+    }
+
+    @Override
+    public void addCoin(Long userId, Long videoId, Integer amount) {
+        Video db = getVideoById(videoId);
+        if (ObjUtil.isNull(db)) {
+            throw new CommonException("非法视频");
+        }
+
+        UserCoinExample coinExample = new UserCoinExample();
+        coinExample.createCriteria().andUserIdEqualTo(userId);
+        UserCoin userCoin = userCoinMapper.selectByExample(coinExample).get(0);
+        if (userCoin.getAmount() < amount) {
+            throw new CommonException("硬币数不足");
+        }
+
+        // 查询之前的投币记录
+        VideoCoinExample videoCoinExample = new VideoCoinExample();
+        videoCoinExample.createCriteria().andUserIdEqualTo(userId).andVideoIdEqualTo(videoId);
+        List<VideoCoin> videoCoins = videoCoinMapper.selectByExample(videoCoinExample);
+        VideoCoin dbCoin = null;
+        if (CollectionUtil.isNotEmpty(videoCoins)) {
+            dbCoin = videoCoins.get(0);
+        }
+
+        VideoCoin finalDb = dbCoin;
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+                try {
+                    Date now = new Date();
+                    if (finalDb == null) {
+                        // 插入投币记录
+                        VideoCoin videoCoin = new VideoCoin();
+                        videoCoin.setVideoId(videoId);
+                        videoCoin.setUserId(userId);
+                        videoCoin.setAmount(amount);
+                        videoCoin.setCreateTime(now);
+                        videoCoinMapper.insert(videoCoin);
+                    } else {
+                        // 更新投币记录
+                        finalDb.setAmount(finalDb.getAmount() + amount);
+                        finalDb.setUpdateTime(now);
+                        videoCoinMapper.updateByPrimaryKeySelective(finalDb);
+                    }
+                    // 更新用户硬币数
+                    userCoin.setAmount(userCoin.getAmount() - amount);
+                    userCoinMapper.updateByPrimaryKeySelective(userCoin);
+                } catch (Exception e) {
+                    transactionStatus.setRollbackOnly();
+                    e.printStackTrace();
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public int listVideoCoinAmount(Long videoId) {
+        VideoCoinExample videoCoinExample = new VideoCoinExample();
+        videoCoinExample.createCriteria().andVideoIdEqualTo(videoId);
+        List<VideoCoin> videoCoins = videoCoinMapper.selectByExample(videoCoinExample);
+        int amount = 0;
+        for (VideoCoin coin : videoCoins) {
+            amount += coin.getAmount();
+        }
+        return amount;
     }
 
     public Video getVideoById(Long videoId) {

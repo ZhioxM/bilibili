@@ -175,4 +175,20 @@ public class VideoController {
         return CommonResult.success(true);
     }
 
+    @ApiOperation("视频投币")
+    @SaCheckLogin
+    @PostMapping("/video/coin")
+    public CommonResult addCoin(Long videoId, Integer coin) {
+        Long userId = StpUtil.getLoginIdAsLong();
+        videoService.addCoin(userId, videoId, coin);
+        return CommonResult.success(null);
+    }
+
+    @ApiOperation("查询视频的投币数")
+    @GetMapping("/video/coin")
+    public CommonResult getVideoCoinAmount(Long videoId) {
+        int amount = videoService.listVideoCoinAmount(videoId);
+        return CommonResult.success(amount);
+    }
+
 }

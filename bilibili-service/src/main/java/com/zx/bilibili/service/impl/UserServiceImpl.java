@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
         userInfoMapper.insertSelective(userInfo);
 
         // 添加用户默认权限
-
+        // 添加用户初始的金币数
 
     }
 

@@ -37,4 +37,8 @@ public interface VideoService {
     List<CollectionGroup> listAllCollectionGroup(Long userId);
 
     List<VideoCollection> listVideoCollection(Long userId, Long videoId);
+
+    void addCoin(Long userId, Long videoId, Integer coin);
+
+    int listVideoCoinAmount(Long videoId);
 }

@@ -18,7 +18,7 @@ public interface UserService {
 
     User getUserByPhone(String phone);
 
-    void login(User user) throws Exception;
+    void login(String phone, String pwd) throws Exception;
 
     User getUser(Long userId);
 

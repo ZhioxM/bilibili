@@ -49,7 +49,7 @@ public class FastDFSUtil {
 
     public String getFileExtName(MultipartFile file){
         if(file == null){
-            throw new ConditionException("非法文件！");
+            throw new CommonException("非法文件！");
         }
         String fileName = file.getOriginalFilename();
         int index = fileName.lastIndexOf(".");
@@ -143,7 +143,7 @@ public class FastDFSUtil {
             randomAccessFile.seek(i);
             byte[] bytes = new byte[SLICE_SIZE];
             int len = randomAccessFile.read(bytes);
-            String path = "/Users/hat/tmpfile/" + count + "." + fileExtName;
+            String path = "D:\\bilibili-temp-file\\" + count + "." + fileExtName;
             File slice = new File(path);
             FileOutputStream fos = new FileOutputStream(slice);
             fos.write(bytes, 0, len);

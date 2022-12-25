@@ -96,16 +96,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void login(User user) throws Exception {
-        String phone = user.getPhone();
-        String password = user.getPassword();
-        if (StrUtil.isBlankIfStr(phone) || StrUtil.isBlankIfStr(password)) {
+    public void login(String phone, String pwd) throws Exception {
+        if (StrUtil.isBlankIfStr(phone) || StrUtil.isBlankIfStr(pwd)) {
             throw new CommonException("请输入正确的用户名和密码");
         }
         User dbUser = getUserByPhone(phone);
         String rawPwd; //  明文密码
         try {
-            rawPwd = RSAUtil.decrypt(password);
+            rawPwd = RSAUtil.decrypt(pwd);
         } catch (Exception e) {
             throw new CommonException("请输入正确的手机号和密码");
         }

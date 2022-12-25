@@ -8,6 +8,7 @@ import com.zx.bilibili.service.FileService;
 import com.zx.bilibili.util.FastDFSUtil;
 import io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.List;
  * @Author: Mzx
  * @Date: 2022/12/21 19:08
  */
+@Service
 public class FileServiceImpl implements FileService {
 
     @Autowired
@@ -34,8 +36,9 @@ public class FileServiceImpl implements FileService {
         if(CollectionUtil.isNotEmpty(db)) {
             return db.get(0).getUrl();
         }
-
+        // 上传至文件服务器，得到文件在服务器上的存储路径
         String url = fastDFSUtil.uploadFileBySlices(slice, fileMD5, sliceNo, totalSliceNo);
+        // 文件入库
         if(!StringUtil.isNullOrEmpty(url)){
             File file = new File();
             file.setCreateTime(new Date());

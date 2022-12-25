@@ -52,9 +52,9 @@ public class UserController {
 
     @ApiOperation("用户登录")
     @PostMapping("/login")
-    public CommonResult<String> login(@RequestBody User user) throws Exception {
+    public CommonResult<String> login(String phone, String pwd) throws Exception {
         // 1. 先登录上
-        userService.login(user);
+        userService.login(phone, pwd);
         // 2. 获取token
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
         // 3. 将token返回给前端

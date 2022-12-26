@@ -1,23 +1,28 @@
 package com.zx.bilibili.domain;
 
 import io.swagger.annotations.ApiModelProperty;
+
 import java.io.Serializable;
 import java.util.Date;
 
 public class Video implements Serializable {
     private Long id;
 
-    private String userId;
+    private Long userId;
 
+    @ApiModelProperty(value = "视频链接")
     private String url;
 
     @ApiModelProperty(value = "封面链接")
     private String thumbnail;
 
+    @ApiModelProperty(value = "视频标题")
     private String title;
 
+    @ApiModelProperty(value = "视频类型")
     private String type;
 
+    @ApiModelProperty(value = "视频时长")
     private String duration;
 
     @ApiModelProperty(value = "分区")
@@ -27,6 +32,7 @@ public class Video implements Serializable {
 
     private Date updateTime;
 
+    @ApiModelProperty(value = "视频描述")
     private String description;
 
     private static final long serialVersionUID = 1L;
@@ -39,12 +45,12 @@ public class Video implements Serializable {
         this.id = id;
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId == null ? null : userId.trim();
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getUrl() {

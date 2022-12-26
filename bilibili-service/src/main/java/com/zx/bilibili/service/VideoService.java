@@ -1,5 +1,6 @@
 package com.zx.bilibili.service;
 
+import com.zx.bilibili.bo.VideoBo;
 import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.domain.VideoCoin;
 import com.zx.bilibili.domain.VideoCollection;
@@ -58,4 +59,6 @@ public interface VideoService {
      * 按最新投稿进行查找
      */
     List<Video> listVideoByGroupIdOrderByUploadTime(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area);
+
+    VideoBo queryVideoDetail(Long videoId);
 }

@@ -4,12 +4,15 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
+import com.zx.bilibili.bo.VideoBo;
 import com.zx.bilibili.common.api.CommonException;
 import com.zx.bilibili.constant.VideoAreaConstant;
 import com.zx.bilibili.domain.*;
 import com.zx.bilibili.mapper.*;
 import com.zx.bilibili.service.UserCoinService;
+import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.service.VideoService;
+import com.zx.bilibili.service.VideoTagService;
 import com.zx.bilibili.util.FastDFSUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +54,12 @@ public class VideoServiceImpl implements VideoService {
     private VideoCoinMapper videoCoinMapper;
 
     @Autowired
+    private VideoTagService videoTagService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
     private UserCoinService userCoinService;
 
     @Autowired
@@ -66,6 +75,7 @@ public class VideoServiceImpl implements VideoService {
         video.setCreateTime(now);
         videoMapper.insertSelective(video);
 
+        // TODO 改成VideoTag实现
         for (VideoTag videoTag : tags) {
             videoTag.setVideoId(video.getId());
             videoTag.setCreateTime(now);
@@ -310,5 +320,16 @@ public class VideoServiceImpl implements VideoService {
         int start = (pageNum - 1) * pageSize;
         int end = pageSize;
         return videoMapper.selectByGroupIdAndAreaOrderByUploadTime(userId, groupId, start, end, area);
+    }
+
+    @Override
+    public VideoBo queryVideoDetail(Long videoId) {
+        Video video = queryVideoById(videoId);
+        VideoBo bo = new VideoBo(video.getId(), video.getUserId(), video.getUrl(), video.getThumbnail(), video.getTitle(), video.getType(), video.getDuration(), video.getArea(), video.getCreateTime());
+        UserInfo userInfo = userService.getUserInfo(video.getUserId());
+        List<Tag> tags = videoTagService.listTagByVideoId(videoId);
+        bo.setUserInfo(userInfo);
+        bo.setTags(tags);
+        return bo;
     }
 }

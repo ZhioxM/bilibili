@@ -1,15 +1,16 @@
-package com.zx.bilibili.vo;
+package com.zx.bilibili.bo;
 
-import com.zx.bilibili.domain.VideoTag;
+import com.zx.bilibili.domain.Tag;
+import com.zx.bilibili.domain.UserInfo;
 
 import java.util.Date;
 import java.util.List;
 
 /**
  * @Author: Mzx
- * @Date: 2022/12/22 15:25
+ * @Date: 2022/12/26 20:42
  */
-public class VideoVo {
+public class VideoBo {
     private Long id;
 
     private Long userId;
@@ -26,13 +27,26 @@ public class VideoVo {
 
     private String area;
 
-    private Date createTime;
+    private Date uploadTime;
 
-    private Date updateTime;
+    private List<Tag> tags;
 
-    private String description;
+    private UserInfo userInfo;
 
-    private List<VideoTag> videoTags;
+    public VideoBo() {
+    }
+
+    public VideoBo(Long id, Long userId, String url, String thumbnail, String title, String type, String duration, String area, Date uploadTime) {
+        this.id = id;
+        this.userId = userId;
+        this.url = url;
+        this.thumbnail = thumbnail;
+        this.title = title;
+        this.type = type;
+        this.duration = duration;
+        this.area = area;
+        this.uploadTime = uploadTime;
+    }
 
     public Long getId() {
         return id;
@@ -98,35 +112,27 @@ public class VideoVo {
         this.area = area;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public Date getUploadTime() {
+        return uploadTime;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setUploadTime(Date uploadTime) {
+        this.uploadTime = uploadTime;
     }
 
-    public Date getUpdateTime() {
-        return updateTime;
+    public List<Tag> getTags() {
+        return tags;
     }
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
-    public String getDescription() {
-        return description;
+    public UserInfo getUserInfo() {
+        return userInfo;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public List<VideoTag> getVideoTags() {
-        return videoTags;
-    }
-
-    public void setVideoTags(List<VideoTag> videoTags) {
-        this.videoTags = videoTags;
+    public void setUserInfo(UserInfo userInfo) {
+        this.userInfo = userInfo;
     }
 }

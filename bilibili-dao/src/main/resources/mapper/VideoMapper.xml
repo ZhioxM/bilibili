@@ -3,7 +3,7 @@
 <mapper namespace="com.zx.bilibili.mapper.VideoMapper">
   <resultMap id="BaseResultMap" type="com.zx.bilibili.domain.Video">
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="userId" jdbcType="BIGINT" property="userId"/>
     <result column="url" jdbcType="VARCHAR" property="url" />
     <result column="thumbnail" jdbcType="VARCHAR" property="thumbnail" />
     <result column="title" jdbcType="VARCHAR" property="title" />
@@ -132,13 +132,13 @@
     <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into t_video (userId, url, thumbnail, 
-      title, type, duration, 
-      area, createTime, updateTime, 
+      insert into t_video (userId, url, thumbnail,
+      title, type, duration,
+      area, createTime, updateTime,
       description)
-    values (#{userId,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{thumbnail,jdbcType=VARCHAR}, 
-      #{title,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{duration,jdbcType=VARCHAR}, 
-      #{area,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
+      values (#{userId,jdbcType=BIGINT}, #{url,jdbcType=VARCHAR}, #{thumbnail,jdbcType=VARCHAR},
+      #{title,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{duration,jdbcType=VARCHAR},
+      #{area,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},
       #{description,jdbcType=LONGVARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.zx.bilibili.domain.Video">
@@ -180,7 +180,7 @@
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="userId != null">
-        #{userId,jdbcType=VARCHAR},
+          #{userId,jdbcType=BIGINT},
       </if>
       <if test="url != null">
         #{url,jdbcType=VARCHAR},
@@ -214,7 +214,7 @@
   <select id="countByExample" parameterType="com.zx.bilibili.domain.VideoExample" resultType="java.lang.Integer">
     select count(*) from t_video
     <if test="_parameter != null">
-      <include refid="Example_Where_Clause"/>
+        <include refid="Example_Where_Clause"/>
     </if>
   </select>
   <select id="selectByGroupIdAndAreaOrderByCollectionTime" resultType="com.zx.bilibili.domain.Video">
@@ -260,7 +260,7 @@
         id = #{record.id,jdbcType=BIGINT},
       </if>
       <if test="record.userId != null">
-        userId = #{record.userId,jdbcType=VARCHAR},
+          userId = #{record.userId,jdbcType=BIGINT},
       </if>
       <if test="record.url != null">
         url = #{record.url,jdbcType=VARCHAR},
@@ -295,9 +295,9 @@
     </if>
   </update>
   <update id="updateByExampleWithBLOBs" parameterType="map">
-    update t_video
-    set id = #{record.id,jdbcType=BIGINT},
-      userId = #{record.userId,jdbcType=VARCHAR},
+      update t_video
+      set id = #{record.id,jdbcType=BIGINT},
+      userId = #{record.userId,jdbcType=BIGINT},
       url = #{record.url,jdbcType=VARCHAR},
       thumbnail = #{record.thumbnail,jdbcType=VARCHAR},
       title = #{record.title,jdbcType=VARCHAR},
@@ -307,14 +307,14 @@
       createTime = #{record.createTime,jdbcType=TIMESTAMP},
       updateTime = #{record.updateTime,jdbcType=TIMESTAMP},
       description = #{record.description,jdbcType=LONGVARCHAR}
-    <if test="_parameter != null">
+      <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update t_video
-    set id = #{record.id,jdbcType=BIGINT},
-      userId = #{record.userId,jdbcType=VARCHAR},
+      update t_video
+      set id = #{record.id,jdbcType=BIGINT},
+      userId = #{record.userId,jdbcType=BIGINT},
       url = #{record.url,jdbcType=VARCHAR},
       thumbnail = #{record.thumbnail,jdbcType=VARCHAR},
       title = #{record.title,jdbcType=VARCHAR},
@@ -323,7 +323,7 @@
       area = #{record.area,jdbcType=VARCHAR},
       createTime = #{record.createTime,jdbcType=TIMESTAMP},
       updateTime = #{record.updateTime,jdbcType=TIMESTAMP}
-    <if test="_parameter != null">
+      <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
@@ -331,7 +331,7 @@
     update t_video
     <set>
       <if test="userId != null">
-        userId = #{userId,jdbcType=VARCHAR},
+          userId = #{userId,jdbcType=BIGINT},
       </if>
       <if test="url != null">
         url = #{url,jdbcType=VARCHAR},
@@ -364,30 +364,30 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.zx.bilibili.domain.Video">
-    update t_video
-    set userId = #{userId,jdbcType=VARCHAR},
-      url = #{url,jdbcType=VARCHAR},
-      thumbnail = #{thumbnail,jdbcType=VARCHAR},
-      title = #{title,jdbcType=VARCHAR},
-      type = #{type,jdbcType=VARCHAR},
-      duration = #{duration,jdbcType=VARCHAR},
-      area = #{area,jdbcType=VARCHAR},
-      createTime = #{createTime,jdbcType=TIMESTAMP},
-      updateTime = #{updateTime,jdbcType=TIMESTAMP},
-      description = #{description,jdbcType=LONGVARCHAR}
-    where id = #{id,jdbcType=BIGINT}
+      update t_video
+      set userId      = #{userId,jdbcType=BIGINT},
+          url         = #{url,jdbcType=VARCHAR},
+          thumbnail   = #{thumbnail,jdbcType=VARCHAR},
+          title       = #{title,jdbcType=VARCHAR},
+          type        = #{type,jdbcType=VARCHAR},
+          duration    = #{duration,jdbcType=VARCHAR},
+          area        = #{area,jdbcType=VARCHAR},
+          createTime  = #{createTime,jdbcType=TIMESTAMP},
+          updateTime  = #{updateTime,jdbcType=TIMESTAMP},
+          description = #{description,jdbcType=LONGVARCHAR}
+      where id = #{id,jdbcType=BIGINT}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.zx.bilibili.domain.Video">
-    update t_video
-    set userId = #{userId,jdbcType=VARCHAR},
-      url = #{url,jdbcType=VARCHAR},
-      thumbnail = #{thumbnail,jdbcType=VARCHAR},
-      title = #{title,jdbcType=VARCHAR},
-      type = #{type,jdbcType=VARCHAR},
-      duration = #{duration,jdbcType=VARCHAR},
-      area = #{area,jdbcType=VARCHAR},
-      createTime = #{createTime,jdbcType=TIMESTAMP},
-      updateTime = #{updateTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=BIGINT}
+      update t_video
+      set userId     = #{userId,jdbcType=BIGINT},
+          url        = #{url,jdbcType=VARCHAR},
+          thumbnail  = #{thumbnail,jdbcType=VARCHAR},
+          title      = #{title,jdbcType=VARCHAR},
+          type       = #{type,jdbcType=VARCHAR},
+          duration   = #{duration,jdbcType=VARCHAR},
+          area       = #{area,jdbcType=VARCHAR},
+          createTime = #{createTime,jdbcType=TIMESTAMP},
+          updateTime = #{updateTime,jdbcType=TIMESTAMP}
+      where id = #{id,jdbcType=BIGINT}
   </update>
 </mapper>

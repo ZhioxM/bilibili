@@ -3,12 +3,14 @@ package com.zx.bilibili.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjUtil;
+import com.zx.bilibili.bo.VideoBo;
 import com.zx.bilibili.bo.VideoRootCommentBO;
 import com.zx.bilibili.common.api.CommonPage;
 import com.zx.bilibili.common.api.CommonResult;
 import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.domain.VideoCoin;
 import com.zx.bilibili.domain.VideoComment;
+import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.service.VideoCommentService;
 import com.zx.bilibili.service.VideoService;
 import com.zx.bilibili.vo.VideoCommentVo;
@@ -37,12 +39,15 @@ public class VideoController {
     @Autowired
     private VideoCommentService videoCommentService;
 
+    @Autowired
+    private UserService userService;
+
     // TODO 理清文件上传和视频投稿这两个API的关系
     @ApiOperation("视频投稿")
     @SaCheckLogin
     @PostMapping("/video")
     public CommonResult<Long> addVideo(@RequestBody VideoVo videoVo) {
-        String userId = StpUtil.getLoginIdAsString();
+        Long userId = StpUtil.getLoginIdAsLong();
         Video video = new Video();
         video.setUserId(userId);
         video.setTitle(videoVo.getTitle());
@@ -189,4 +194,11 @@ public class VideoController {
         return CommonResult.success(vos);
     }
 
+    @ApiOperation("视频详情")
+    @SaCheckLogin
+    @GetMapping("/video/detail{videoId}")
+    public CommonResult<VideoBo> getVideoDetail(@PathVariable Long videoId) {
+        VideoBo detail = videoService.queryVideoDetail(videoId);
+        return CommonResult.success(detail);
+    }
 }

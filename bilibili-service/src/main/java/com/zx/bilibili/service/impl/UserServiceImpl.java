@@ -13,6 +13,7 @@ import com.zx.bilibili.exception.ConditionException;
 import com.zx.bilibili.mapper.RefreshTokenMapper;
 import com.zx.bilibili.mapper.UserInfoMapper;
 import com.zx.bilibili.mapper.UserMapper;
+import com.zx.bilibili.service.UserCoinService;
 import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.util.MD5Util;
 import com.zx.bilibili.util.RSAUtil;
@@ -37,6 +38,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RefreshTokenMapper refreshTokenMapper;
+
+    @Autowired
+    private UserCoinService userCoinService;
 
     @Override
     @Transactional
@@ -81,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
         // 添加用户默认权限
         // 添加用户初始的金币数
-
+        userCoinService.addUserCoin(user.getId(), 0);
     }
 
     @Override

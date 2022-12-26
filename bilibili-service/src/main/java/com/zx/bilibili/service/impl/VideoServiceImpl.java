@@ -6,6 +6,7 @@ import com.github.pagehelper.PageHelper;
 import com.zx.bilibili.common.api.CommonException;
 import com.zx.bilibili.domain.*;
 import com.zx.bilibili.mapper.*;
+import com.zx.bilibili.service.UserCoinService;
 import com.zx.bilibili.service.VideoService;
 import com.zx.bilibili.util.FastDFSUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class VideoServiceImpl implements VideoService {
     private VideoCoinMapper videoCoinMapper;
 
     @Autowired
-    private UserCoinMapper userCoinMapper;
+    private UserCoinService userCoinService;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -88,7 +89,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public void likeVideo(Long userId, Long videoId) {
-        Video db = getVideoById(videoId);
+        Video db = queryVideoById(videoId);
         if (ObjUtil.isNull(db)) {
             throw new CommonException("非法视频");
         }
@@ -131,7 +132,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public void collectVideo(Long userId, Long videoId, Long[] groupId) {
-        Video db = getVideoById(videoId);
+        Video db = queryVideoById(videoId);
         if (ObjUtil.isNull(db)) {
             throw new CommonException("非法视频");
         }
@@ -178,7 +179,7 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public void uncollectVideo(Long userId, Long videoId, Long[] groupId) {
-        Video db = getVideoById(videoId);
+        Video db = queryVideoById(videoId);
         if (ObjUtil.isNull(db)) {
             throw new CommonException("非法视频");
         }
@@ -219,14 +220,12 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public void addCoin(Long userId, Long videoId, Integer amount) {
-        Video db = getVideoById(videoId);
+        Video db = queryVideoById(videoId);
         if (ObjUtil.isNull(db)) {
             throw new CommonException("非法视频");
         }
 
-        UserCoinExample coinExample = new UserCoinExample();
-        coinExample.createCriteria().andUserIdEqualTo(userId);
-        UserCoin userCoin = userCoinMapper.selectByExample(coinExample).get(0);
+        UserCoin userCoin = userCoinService.getUserCoin(userId);
         if (userCoin.getAmount() < amount) {
             throw new CommonException("硬币数不足");
         }
@@ -261,8 +260,7 @@ public class VideoServiceImpl implements VideoService {
                         videoCoinMapper.updateByPrimaryKeySelective(finalDb);
                     }
                     // 更新用户硬币数
-                    userCoin.setAmount(userCoin.getAmount() - amount);
-                    userCoinMapper.updateByPrimaryKeySelective(userCoin);
+                    userCoinService.updateUserCoin(userId, userCoin.getAmount() - amount);
                 } catch (Exception e) {
                     transactionStatus.setRollbackOnly();
                     e.printStackTrace();
@@ -273,7 +271,7 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public int listVideoCoinAmount(Long videoId) {
+    public int queryVideoCoinAmount(Long videoId) {
         VideoCoinExample videoCoinExample = new VideoCoinExample();
         videoCoinExample.createCriteria().andVideoIdEqualTo(videoId);
         List<VideoCoin> videoCoins = videoCoinMapper.selectByExample(videoCoinExample);
@@ -284,7 +282,15 @@ public class VideoServiceImpl implements VideoService {
         return amount;
     }
 
-    public Video getVideoById(Long videoId) {
+    @Override
+    public List<VideoCoin> queryVideoCoin(Long userId, Long videoId) {
+        VideoCoinExample videoCoinExample = new VideoCoinExample();
+        videoCoinExample.createCriteria().andUserIdEqualTo(userId).andVideoIdEqualTo(videoId);
+        return videoCoinMapper.selectByExample(videoCoinExample);
+    }
+
+    @Override
+    public Video queryVideoById(Long videoId) {
         VideoExample videoExample = new VideoExample();
         videoExample.createCriteria().andIdEqualTo(videoId);
         List<Video> videos = videoMapper.selectByExample(videoExample);

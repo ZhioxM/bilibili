@@ -121,8 +121,6 @@ public class UserFollowingController {
                     userInfo.getAvatar(),
                     userInfo.getGender(),
                     userInfo.getBirth(),
-                    userInfo.getCreateTime(),
-                    userInfo.getUpdateTime(),
                     userInfo.getSign(),
                     followed
             );

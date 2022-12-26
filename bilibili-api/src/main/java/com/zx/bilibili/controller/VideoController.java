@@ -3,21 +3,20 @@ package com.zx.bilibili.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import com.zx.bilibili.bo.VideoRootCommentBO;
 import com.zx.bilibili.common.api.CommonPage;
 import com.zx.bilibili.common.api.CommonResult;
-import com.zx.bilibili.domain.CollectionGroup;
-import com.zx.bilibili.domain.Video;
-import com.zx.bilibili.domain.VideoCollection;
+import com.zx.bilibili.domain.*;
+import com.zx.bilibili.service.VideoCommentService;
 import com.zx.bilibili.service.VideoService;
-import com.zx.bilibili.vo.CollectionGroupVo;
-import com.zx.bilibili.vo.VideoCollectionVo;
-import com.zx.bilibili.vo.VideoVo;
+import com.zx.bilibili.vo.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +30,9 @@ public class VideoController {
 
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private VideoCommentService videoCommentService;
 
     // TODO 理清文件上传和视频投稿这两个API的关系
     @ApiOperation("视频投稿")
@@ -54,7 +56,9 @@ public class VideoController {
     @ApiOperation("分页查询视频列表")
     @SaCheckLogin
     @GetMapping("/videos")
-    public CommonResult<CommonPage<Video>> listVideo(Integer pageNum, Integer pageSize, String area) {
+    public CommonResult<CommonPage<Video>> listVideo(@RequestParam(required = false, defaultValue = "1") Integer pageNum,
+                                                     @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+                                                     @RequestParam String area) {
         List<Video> videos = videoService.listVideos(pageNum, pageSize, area);
         return CommonResult.success(CommonPage.restPage(videos));
     }
@@ -150,23 +154,21 @@ public class VideoController {
     @ApiOperation("查询用户对当前视频的收藏夹信息")
     @SaCheckLogin
     @GetMapping("/video/collect/list")
-    public CommonResult<List<VideoCollectionVo>> listVideoCollection(Long videoId) {
+    public CommonResult<List<VideoCollectionFolderVo>> listVideoCollection(@RequestParam Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<VideoCollection> videoCollections = videoService.listVideoCollection(userId, videoId);
         // 所在收藏的分组id
         Set<Long> collectedGroupId = videoCollections.stream().map(VideoCollection::getGroupId).collect(Collectors.toSet());
         // 所有收藏夹
         List<CollectionGroup> collectionGroups = videoService.listAllCollectionGroup(userId);
-        List<VideoCollectionVo> vo = collectionGroups.stream().map(o -> {
-            return new VideoCollectionVo(o.getId(), o.getName(), collectedGroupId.contains(o.getId()));
-        }).collect(Collectors.toList());
+        List<VideoCollectionFolderVo> vo = collectionGroups.stream().map(o -> new VideoCollectionFolderVo(videoId, o.getId(), o.getName(), collectedGroupId.contains(o.getId()))).collect(Collectors.toList());
         return CommonResult.success(vo);
     }
 
     @ApiOperation("查询用户是否收藏此视频")
     @SaCheckLogin
     @GetMapping("/video/collect/{videoId}")
-    public CommonResult videoCollection(@PathVariable Long videoId) {
+    public CommonResult getVideoCollectionStatus(@PathVariable Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         List<VideoCollection> videoCollections = videoService.listVideoCollection(userId, videoId);
         if (CollectionUtil.isEmpty(videoCollections)) {
@@ -178,7 +180,8 @@ public class VideoController {
     @ApiOperation("视频投币")
     @SaCheckLogin
     @PostMapping("/video/coin")
-    public CommonResult addCoin(Long videoId, Integer coin) {
+    public CommonResult addCoin(@RequestParam Long videoId,
+                                @RequestParam Integer coin) {
         Long userId = StpUtil.getLoginIdAsLong();
         videoService.addCoin(userId, videoId, coin);
         return CommonResult.success(null);
@@ -186,9 +189,55 @@ public class VideoController {
 
     @ApiOperation("查询视频的投币数")
     @GetMapping("/video/coin")
-    public CommonResult getVideoCoinAmount(Long videoId) {
-        int amount = videoService.listVideoCoinAmount(videoId);
+    public CommonResult getVideoCoinAmount(@RequestParam Long videoId) {
+        int amount = videoService.queryVideoCoinAmount(videoId);
         return CommonResult.success(amount);
+    }
+
+    @ApiOperation("查询用户是否对当前视频投过币")
+    @SaCheckLogin
+    @GetMapping("/video/coin/{videoId}")
+    public CommonResult getVideoCoinStatus(@PathVariable Long videoId) {
+        Long userId = StpUtil.getLoginIdAsLong();
+        List<VideoCoin> db = videoService.queryVideoCoin(userId, videoId);
+        return CommonResult.success(CollectionUtil.isNotEmpty(db));
+    }
+
+    @ApiOperation("分页查询一级评论")
+    @GetMapping("/video/comment/{videoId}")
+    public CommonResult<List<VideoRootCommentVo>> listVideoRootComment(@PathVariable Long videoId,
+                                                                       @RequestParam(required = false, defaultValue = "1") Integer pageNum,
+                                                                       @RequestParam(required = false, defaultValue = "10") Integer pageSize,
+                                                                       @RequestParam(required = false, defaultValue = "0") Integer orderBy) {
+        List<VideoRootCommentBO> bos = videoCommentService.listVideoRootComment(videoId, pageNum, pageSize, orderBy);
+        List<VideoRootCommentVo> vos = new ArrayList<>(bos.size());
+        for (VideoRootCommentBO bo : bos) {
+            VideoRootCommentVo vo = new VideoRootCommentVo(bo.getRootComment().getId(),
+                                                           bo.getRootComment().getVideoId(),
+                                                           bo.getRootComment().getUserId(),
+                                                           bo.getRootComment().getReplyUserId(),
+                                                           bo.getRootComment().getCreateTime(),
+                                                           bo.getRootComment().getContext(),
+                                                           bo.getTotalReply());
+            List<VideoCommentVo> reply = bo.getTopKSubComment().stream().map(
+                    o -> new VideoCommentVo(o.getId(), o.getVideoId(), o.getUserId(), o.getReplyUserId(), o.getRootId(), o.getParentId(), o.getCreateTime(), o.getContext())).collect(Collectors.toList());
+            vo.setReply(reply);
+            vos.add(vo);
+        }
+        return CommonResult.success(vos);
+    }
+
+    @ApiOperation("分页查询子评论")
+    @GetMapping("/video/comment/{videoId}/{commentId}")
+    public CommonResult<List<VideoCommentVo>> listVideoSubComment(@PathVariable Long videoId,
+                                                                  @PathVariable Long commentId,
+                                                                  @RequestParam(required = false, defaultValue = "1") Integer pageNum,
+                                                                  @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
+        // 二级评论也可以做分页
+        List<VideoComment> subComments = videoCommentService.listVideoSubComment(videoId, commentId, pageNum, pageSize);
+        List<VideoCommentVo> vos = subComments.stream().map(
+                o -> new VideoCommentVo(o.getId(), o.getVideoId(), o.getUserId(), o.getReplyUserId(), o.getRootId(), o.getParentId(), o.getCreateTime(), o.getContext())).collect(Collectors.toList());
+        return CommonResult.success(vos);
     }
 
 }

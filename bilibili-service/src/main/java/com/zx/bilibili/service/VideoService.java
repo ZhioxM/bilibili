@@ -1,9 +1,6 @@
 package com.zx.bilibili.service;
 
-import com.zx.bilibili.domain.CollectionGroup;
-import com.zx.bilibili.domain.Video;
-import com.zx.bilibili.domain.VideoCollection;
-import com.zx.bilibili.domain.VideoTag;
+import com.zx.bilibili.domain.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,5 +37,9 @@ public interface VideoService {
 
     void addCoin(Long userId, Long videoId, Integer coin);
 
-    int listVideoCoinAmount(Long videoId);
+    int queryVideoCoinAmount(Long videoId);
+
+    List<VideoCoin> queryVideoCoin(Long userId, Long videoId);
+
+    Video queryVideoById(Long videoId);
 }

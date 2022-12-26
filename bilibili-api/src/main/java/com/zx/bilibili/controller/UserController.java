@@ -69,13 +69,8 @@ public class UserController {
         User user = userService.getUser(userId);
         UserInfo userInfo = userService.getUserInfo(userId);
         UserVo userVo = new UserVo();
-        userVo.setId(userId);
         userVo.setPhone(user.getPhone());
-        userVo.setPassword(user.getPassword());
-        userVo.setSalt(user.getSalt());
         userVo.setEmail(user.getEmail());
-        userVo.setCreatetime(user.getCreateTime());
-        userVo.setUpdatetime(user.getUpdateTime());
         userVo.setUserInfo(userInfo);
         return CommonResult.success(userVo);
     }
@@ -119,8 +114,6 @@ public class UserController {
                                   o.getAvatar(),
                                   o.getGender(),
                                   o.getBirth(),
-                                  o.getCreateTime(),
-                                  o.getUpdateTime(),
                                   o.getSign(),
                                   followed);
         }).collect(Collectors.toList());

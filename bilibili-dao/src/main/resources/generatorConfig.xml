@@ -45,7 +45,7 @@
         </javaClientGenerator>
 
         <!--生成全部表tableName设为%-->
-        <table tableName="t_video_view" domainObjectName="VideoView">
+        <table tableName="t_video_comment" domainObjectName="VideoComment">
             <property name="useActualColumnNames" value="true"/>
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>

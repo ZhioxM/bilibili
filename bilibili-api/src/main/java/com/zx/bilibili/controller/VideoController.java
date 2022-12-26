@@ -141,6 +141,17 @@ public class VideoController {
         return CommonResult.success(ObjUtil.isNotNull(db));
     }
 
+    /**
+     * 添加视频评论
+     */
+    @PostMapping("/video/comment")
+    public CommonResult addVideoComment(@RequestBody VideoComment videoComment) {
+        Long userId = StpUtil.getLoginIdAsLong();
+        videoComment.setUserId(userId);
+        videoCommentService.addVideoComment(videoComment);
+        return CommonResult.success(null);
+    }
+
     @ApiOperation("分页查询一级评论")
     @GetMapping("/video/comment/{videoId}")
     public CommonResult<List<VideoRootCommentVo>> listVideoRootComment(@PathVariable Long videoId,

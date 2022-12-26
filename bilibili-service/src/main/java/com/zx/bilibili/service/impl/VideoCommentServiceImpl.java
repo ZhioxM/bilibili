@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +28,20 @@ public class VideoCommentServiceImpl implements VideoCommentService {
 
     @Autowired
     private VideoService videoService;
+
+    @Override
+    public void addVideoComment(VideoComment videoComment) {
+        Long videoId = videoComment.getVideoId();
+        if (ObjUtil.isNull(videoId)) {
+            throw new CommonException("参数异常");
+        }
+        Video video = videoService.queryVideoById(videoId);
+        if (ObjUtil.isNull(video)) {
+            throw new CommonException("非法视频");
+        }
+        videoComment.setCreateTime(new Date());
+        videoCommentMapper.insertSelective(videoComment);
+    }
 
     @Override
     public List<VideoRootCommentBO> listVideoRootComment(Long videoId, Integer pageNum, Integer pageSize, Integer orderBy) {

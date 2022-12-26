@@ -13,4 +13,6 @@ public interface VideoCommentService {
     List<VideoRootCommentBO> listVideoRootComment(Long videoId, Integer pageNum, Integer pageSize, Integer orderBy);
 
     List<VideoComment> listVideoSubComment(Long videoId, Long commentId, Integer pageNum, Integer pageSize);
+
+    void addVideoComment(VideoComment videoComment);
 }

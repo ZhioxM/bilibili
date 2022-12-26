@@ -142,10 +142,11 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="com.zx.bilibili.domain.VideoCollectionExample" resultType="java.lang.Integer">
+  <select id="countByExample" parameterType="com.zx.bilibili.domain.VideoCollectionExample"
+          resultType="java.lang.Integer">
     select count(*) from t_video_collection
     <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
+      <include refid="Example_Where_Clause"/>
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
@@ -168,7 +169,7 @@
       </if>
     </set>
     <if test="_parameter != null">
-      <include refid="Update_By_Example_Where_Clause" />
+      <include refid="Update_By_Example_Where_Clause"/>
     </if>
   </update>
   <update id="updateByExample" parameterType="map">

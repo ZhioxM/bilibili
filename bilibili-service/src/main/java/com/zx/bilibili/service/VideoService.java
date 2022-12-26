@@ -1,6 +1,9 @@
 package com.zx.bilibili.service;
 
-import com.zx.bilibili.domain.*;
+import com.zx.bilibili.domain.Video;
+import com.zx.bilibili.domain.VideoCoin;
+import com.zx.bilibili.domain.VideoCollection;
+import com.zx.bilibili.domain.VideoTag;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,15 +34,28 @@ public interface VideoService {
 
     int collectCount(Long videoId);
 
-    List<CollectionGroup> listAllCollectionGroup(Long userId);
-
     List<VideoCollection> listVideoCollection(Long userId, Long videoId);
 
     void addCoin(Long userId, Long videoId, Integer coin);
 
     int queryVideoCoinAmount(Long videoId);
 
-    List<VideoCoin> queryVideoCoin(Long userId, Long videoId);
+    VideoCoin queryVideoCoin(Long userId, Long videoId);
 
     Video queryVideoById(Long videoId);
+
+    /**
+     * 按最近收藏进行查找
+     */
+    List<Video> listVideoByGroupIdOrderByCollectionTime(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area);
+
+    /**
+     * 按最多播放进行查找
+     */
+    List<Video> listVideoByGroupIdOrderByPlayAmount(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area);
+
+    /**
+     * 按最新投稿进行查找
+     */
+    List<Video> listVideoByGroupIdOrderByUploadTime(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area);
 }

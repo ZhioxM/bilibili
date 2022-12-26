@@ -2,14 +2,18 @@ package com.zx.bilibili.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjUtil;
 import com.zx.bilibili.bo.VideoRootCommentBO;
 import com.zx.bilibili.common.api.CommonPage;
 import com.zx.bilibili.common.api.CommonResult;
-import com.zx.bilibili.domain.*;
+import com.zx.bilibili.domain.Video;
+import com.zx.bilibili.domain.VideoCoin;
+import com.zx.bilibili.domain.VideoComment;
 import com.zx.bilibili.service.VideoCommentService;
 import com.zx.bilibili.service.VideoService;
-import com.zx.bilibili.vo.*;
+import com.zx.bilibili.vo.VideoCommentVo;
+import com.zx.bilibili.vo.VideoRootCommentVo;
+import com.zx.bilibili.vo.VideoVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -112,71 +115,6 @@ public class VideoController {
         return CommonResult.success(i);
     }
 
-    @ApiOperation("查询用户收藏夹")
-    @SaCheckLogin
-    @GetMapping("/video/collect/group")
-    public CommonResult<List<CollectionGroupVo>> getCollectionGroup() {
-        Long userId = StpUtil.getLoginIdAsLong();
-        List<CollectionGroup> collectionGroups = videoService.listAllCollectionGroup(userId);
-        List<CollectionGroupVo> vo = collectionGroups.stream().map(o -> {
-            return new CollectionGroupVo(o.getId(), o.getName(), o.getType());
-        }).collect(Collectors.toList());
-        return CommonResult.success(vo);
-    }
-
-    // 新建用户收藏夹，删除用户收藏夹
-
-    @ApiOperation("添加收藏")
-    @SaCheckLogin
-    @PostMapping("/video/collect")
-    public CommonResult collectVideo(Long videoId, Long[] groupId) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        videoService.collectVideo(userId, videoId, groupId);
-        return CommonResult.success(null);
-    }
-
-    @ApiOperation("删除收藏")
-    @SaCheckLogin
-    @DeleteMapping("/video/collect")
-    public CommonResult unCollectVideo(Long videoId, Long[] groupId) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        videoService.uncollectVideo(userId, videoId, groupId);
-        return CommonResult.success(null);
-    }
-
-    @ApiOperation("查询视频的收藏数量")
-    @GetMapping("/video/collect/total")
-    public CommonResult countVideoCollect(Long videoId) {
-        int count = videoService.collectCount(videoId);
-        return CommonResult.success(count);
-    }
-
-    @ApiOperation("查询用户对当前视频的收藏夹信息")
-    @SaCheckLogin
-    @GetMapping("/video/collect/list")
-    public CommonResult<List<VideoCollectionFolderVo>> listVideoCollection(@RequestParam Long videoId) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        List<VideoCollection> videoCollections = videoService.listVideoCollection(userId, videoId);
-        // 所在收藏的分组id
-        Set<Long> collectedGroupId = videoCollections.stream().map(VideoCollection::getGroupId).collect(Collectors.toSet());
-        // 所有收藏夹
-        List<CollectionGroup> collectionGroups = videoService.listAllCollectionGroup(userId);
-        List<VideoCollectionFolderVo> vo = collectionGroups.stream().map(o -> new VideoCollectionFolderVo(videoId, o.getId(), o.getName(), collectedGroupId.contains(o.getId()))).collect(Collectors.toList());
-        return CommonResult.success(vo);
-    }
-
-    @ApiOperation("查询用户是否收藏此视频")
-    @SaCheckLogin
-    @GetMapping("/video/collect/{videoId}")
-    public CommonResult getVideoCollectionStatus(@PathVariable Long videoId) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        List<VideoCollection> videoCollections = videoService.listVideoCollection(userId, videoId);
-        if (CollectionUtil.isEmpty(videoCollections)) {
-            return CommonResult.success(false);
-        }
-        return CommonResult.success(true);
-    }
-
     @ApiOperation("视频投币")
     @SaCheckLogin
     @PostMapping("/video/coin")
@@ -199,8 +137,8 @@ public class VideoController {
     @GetMapping("/video/coin/{videoId}")
     public CommonResult getVideoCoinStatus(@PathVariable Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
-        List<VideoCoin> db = videoService.queryVideoCoin(userId, videoId);
-        return CommonResult.success(CollectionUtil.isNotEmpty(db));
+        VideoCoin db = videoService.queryVideoCoin(userId, videoId);
+        return CommonResult.success(ObjUtil.isNotNull(db));
     }
 
     @ApiOperation("分页查询一级评论")

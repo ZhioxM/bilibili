@@ -2,8 +2,10 @@ package com.zx.bilibili.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.zx.bilibili.common.api.CommonException;
+import com.zx.bilibili.constant.VideoAreaConstant;
 import com.zx.bilibili.domain.*;
 import com.zx.bilibili.mapper.*;
 import com.zx.bilibili.service.UserCoinService;
@@ -75,7 +77,9 @@ public class VideoServiceImpl implements VideoService {
     public List<Video> listVideos(Integer pageNum, Integer pageSize, String area) {
         PageHelper.startPage(pageNum, pageSize);
         VideoExample videoExample = new VideoExample();
-        videoExample.createCriteria().andAreaEqualTo(area);
+        if (!StrUtil.equals(area, VideoAreaConstant.ALL_AREA)) {
+            videoExample.createCriteria().andAreaEqualTo(area);
+        }
         return videoMapper.selectByExample(videoExample);
     }
 
@@ -199,17 +203,6 @@ public class VideoServiceImpl implements VideoService {
         return videoCollectionMapper.countByExample(ex);
     }
 
-    @Override
-    public List<CollectionGroup> listAllCollectionGroup(Long userId) {
-        CollectionGroupExample ex = new CollectionGroupExample();
-        ex.createCriteria().andUserIdEqualTo(userId);
-        List<CollectionGroup> customGroup = collectionGroupMapper.selectByExample(ex);
-
-        ex.clear();
-        ex.createCriteria().andTypeEqualTo("0");
-        List<CollectionGroup> defaultGroup = collectionGroupMapper.selectByExample(ex);
-        return CollectionUtil.unionAll(customGroup, defaultGroup);
-    }
 
     @Override
     public List<VideoCollection> listVideoCollection(Long userId, Long videoId) {
@@ -231,15 +224,7 @@ public class VideoServiceImpl implements VideoService {
         }
 
         // 查询之前的投币记录
-        VideoCoinExample videoCoinExample = new VideoCoinExample();
-        videoCoinExample.createCriteria().andUserIdEqualTo(userId).andVideoIdEqualTo(videoId);
-        List<VideoCoin> videoCoins = videoCoinMapper.selectByExample(videoCoinExample);
-        VideoCoin dbCoin = null;
-        if (CollectionUtil.isNotEmpty(videoCoins)) {
-            dbCoin = videoCoins.get(0);
-        }
-
-        VideoCoin finalDb = dbCoin;
+        VideoCoin finalDb = queryVideoCoin(userId, videoId);
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
             @Override
             protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
@@ -283,10 +268,14 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
-    public List<VideoCoin> queryVideoCoin(Long userId, Long videoId) {
+    public VideoCoin queryVideoCoin(Long userId, Long videoId) {
         VideoCoinExample videoCoinExample = new VideoCoinExample();
         videoCoinExample.createCriteria().andUserIdEqualTo(userId).andVideoIdEqualTo(videoId);
-        return videoCoinMapper.selectByExample(videoCoinExample);
+        List<VideoCoin> videoCoins = videoCoinMapper.selectByExample(videoCoinExample);
+        if (CollectionUtil.isEmpty(videoCoins)) {
+            return null;
+        }
+        return videoCoins.get(0);
     }
 
     @Override
@@ -298,5 +287,28 @@ public class VideoServiceImpl implements VideoService {
             return null;
         }
         return videos.get(0);
+    }
+
+    @Override
+    public List<Video> listVideoByGroupIdOrderByCollectionTime(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area) {
+        int start = (pageNum - 1) * pageSize;
+        int end = pageSize;
+        return videoMapper.selectByGroupIdAndAreaOrderByCollectionTime(userId, groupId, start, end, area);
+    }
+
+    @Override
+    public List<Video> listVideoByGroupIdOrderByPlayAmount(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area) {
+        // 分组ID是用户唯一的，所以查询的时候不需要userId
+        int start = (pageNum - 1) * pageSize;
+        int end = pageSize;
+        // TODO 统计播放量后做
+        return null;
+    }
+
+    @Override
+    public List<Video> listVideoByGroupIdOrderByUploadTime(Long userId, Long groupId, Integer pageNum, Integer pageSize, String area) {
+        int start = (pageNum - 1) * pageSize;
+        int end = pageSize;
+        return videoMapper.selectByGroupIdAndAreaOrderByUploadTime(userId, groupId, start, end, area);
     }
 }

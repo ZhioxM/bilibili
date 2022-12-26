@@ -2,8 +2,9 @@ package com.zx.bilibili.mapper;
 
 import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.domain.VideoExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface VideoMapper {
     int countByExample(VideoExample example);
@@ -33,4 +34,8 @@ public interface VideoMapper {
     int updateByPrimaryKeyWithBLOBs(Video record);
 
     int updateByPrimaryKey(Video record);
+
+    List<Video> selectByGroupIdAndAreaOrderByCollectionTime(@Param("userId") Long userId, @Param("groupId") Long groupId, @Param("start") int start, @Param("end") int end, @Param("area") String area);
+
+    List<Video> selectByGroupIdAndAreaOrderByUploadTime(@Param("userId") Long userId, @Param("groupId") Long groupId, @Param("start") int start, @Param("end") int end, @Param("area") String area);
 }

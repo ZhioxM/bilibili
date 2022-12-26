@@ -214,8 +214,44 @@
   <select id="countByExample" parameterType="com.zx.bilibili.domain.VideoExample" resultType="java.lang.Integer">
     select count(*) from t_video
     <if test="_parameter != null">
-      <include refid="Example_Where_Clause" />
+      <include refid="Example_Where_Clause"/>
     </if>
+  </select>
+  <select id="selectByGroupIdAndAreaOrderByCollectionTime" resultType="com.zx.bilibili.domain.Video">
+    SELECT
+    v.*
+    FROM
+    t_video v
+    JOIN
+    t_video_collection vc
+    ON v.id = vc.videoId
+    WHERE
+    vc.groupId = #{groupId}
+    <if test="area != null">
+      AND
+      v.area = #{area}
+    </if>
+    ORDER BY
+    vc.createTime DESC
+    LIMIT #{start}, #{end}
+  </select>
+  <select id="selectByGroupIdAndAreaOrderByUploadTime" resultType="com.zx.bilibili.domain.Video">
+    SELECT
+    v.*
+    FROM
+    t_video v
+    JOIN
+    t_video_collection vc
+    ON v.id = vc.videoId
+    WHERE
+    vc.groupId = #{groupId}
+    <if test="area != null">
+      AND
+      v.area = #{area}
+    </if>
+    ORDER BY
+    v.createTime DESC
+    LIMIT #{start}, #{end}
   </select>
   <update id="updateByExampleSelective" parameterType="map">
     update t_video

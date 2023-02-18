@@ -8,7 +8,7 @@ import java.util.List;
  * @Author: Mzx
  * @Date: 2022/12/26 17:53
  */
-public interface VideoCollectionService {
+public interface CollectService {
     /**
      * 按最近收藏进行查找
      */

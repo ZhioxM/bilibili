@@ -2,8 +2,11 @@ package com.zx.bilibili.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.zx.bilibili.common.api.CommonResult;
+import com.zx.bilibili.dto.FileMergeDTO;
+import com.zx.bilibili.dto.FileUploadDTO;
 import com.zx.bilibili.service.FileService;
 import com.zx.bilibili.util.FastDFSUtil;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,6 +40,7 @@ public class FileController {
     // 查查资料，看看人家是怎么解决的
     // 我的一个思路，前端通过一个请求将各个分片的序号、大小等信息等信息先全部发过来？、
     // md5是整个文件的md5不是某一个分片的md5
+    @Deprecated
     @SaCheckLogin
     @PutMapping("/file/upload")
     public CommonResult<String> uploadFileBySlices(MultipartFile slice,
@@ -45,6 +49,23 @@ public class FileController {
                                                    Integer totalSliceNo) throws Exception {
         String filePath = fileService.uploadFileBySlices(slice, fileMd5, sliceNo, totalSliceNo);
         return CommonResult.success(filePath);
+    }
+
+    @SaCheckLogin
+    @ApiOperation("分片上传")
+    @PostMapping("/chuck/upload")
+    public CommonResult uploadChunk(MultipartFile file,
+                                    FileUploadDTO fileUploadDTO
+    ) throws Exception {
+        fileService.uploadFileByChunk(file, fileUploadDTO);
+        return CommonResult.success(null);
+    }
+
+    @SaCheckLogin
+    @ApiOperation("分片合并")
+    @PostMapping("/chuck/merge")
+    public CommonResult mergeChunk(FileMergeDTO fileMergeDTO) {
+        return CommonResult.success(fileService.mergeFile(fileMergeDTO));
     }
 
     /**

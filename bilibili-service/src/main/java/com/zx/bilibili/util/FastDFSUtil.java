@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 @Component
@@ -47,13 +48,22 @@ public class FastDFSUtil {
     @Value("${fdfs.http.storage-addr}")
     private String httpFdfsStorageAddr;
 
-    public String getFileExtName(MultipartFile file){
-        if(file == null){
+    public String getFileExtName(MultipartFile file) {
+        if (file == null) {
             throw new CommonException("非法文件！");
         }
         String fileName = file.getOriginalFilename();
         int index = fileName.lastIndexOf(".");
-        return fileName.substring(index+1);
+        return fileName.substring(index + 1);
+    }
+
+    public String getFileExtName(File file) {
+        if (file == null) {
+            throw new CommonException("非法文件！");
+        }
+        String fileName = file.getPath();
+        int index = fileName.lastIndexOf(".");
+        return fileName.substring(index + 1);
     }
 
     //上传小文件
@@ -67,25 +77,36 @@ public class FastDFSUtil {
     public String uploadCommonFile(File file, String fileType) throws Exception {
         Set<MetaData> metaDataSet = new HashSet<>();
         StorePath storePath = fastFileStorageClient.uploadFile(new FileInputStream(file),
-                                    file.length(), fileType, metaDataSet);
+                                                               file.length(), fileType, metaDataSet);
         return storePath.getPath();
     }
 
-    //上传可以断点续传的文件(第一次上传时使用，返回文件存储的路径)
-    private String uploadAppenderFile(MultipartFile file) throws Exception{
+    //上传可以分片的文件(第一次上传时使用，返回文件存储的路径)
+    public String uploadAppenderFile(MultipartFile file) throws Exception {
         String fileType = this.getFileExtName(file);
         StorePath storePath = appendFileStorageClient.uploadAppenderFile(DEFAULT_GROUP, file.getInputStream(), file.getSize(), fileType);
         return storePath.getPath();
     }
 
+    public String uploadAppenderFile(File file) throws Exception {
+        String fileType = this.getFileExtName(file);
+        StorePath storePath = appendFileStorageClient.uploadAppenderFile(DEFAULT_GROUP, Files.newInputStream(file.toPath()), file.length(), fileType);
+        return storePath.getPath();
+    }
+
+    public void appendFile(File file, String filePath) throws IOException {
+        appendFileStorageClient.appendFile(DEFAULT_GROUP, filePath, Files.newInputStream(file.toPath()), file.length());
+    }
+
     // 续传断点传输的文件
-    private void modifyAppenderFile(MultipartFile file, String filePath, long offset) throws Exception{
+    public void modifyAppenderFile(MultipartFile file, String filePath, long offset) throws Exception {
         appendFileStorageClient.modifyFile(DEFAULT_GROUP, filePath, file.getInputStream(), file.getSize(), offset);
     }
 
     // 文件分片上传
+    @Deprecated // 废弃。没有考虑文件分片乱序到达的情况
     public String uploadFileBySlices(MultipartFile file, String fileMd5, Integer sliceNo, Integer totalSliceNo) throws Exception {
-        if(file == null || sliceNo == null || totalSliceNo == null){
+        if (file == null || sliceNo == null || totalSliceNo == null) {
             throw new ConditionException("参数异常！");
         }
         String pathKey = PATH_KEY + fileMd5;
@@ -93,37 +114,37 @@ public class FastDFSUtil {
         String uploadedNoKey = UPLOADED_NO_KEY + fileMd5;
         String uploadedOffsetStr = redisTemplate.opsForValue().get(uploadedOffsetKey);
         Long uploadedOffset = 0L;
-        if(!StringUtil.isNullOrEmpty(uploadedOffsetStr)){
+        if (!StringUtil.isNullOrEmpty(uploadedOffsetStr)) {
             uploadedOffset = Long.valueOf(uploadedOffsetStr);
         }
-        if(sliceNo == 1){
+        if (sliceNo == 1) {
             //上传第一个分片
             String path = this.uploadAppenderFile(file);
-            if(StringUtil.isNullOrEmpty(path)){
+            if (StringUtil.isNullOrEmpty(path)) {
                 throw new CommonException("上传失败！");
             }
             // 保存文件路径
             redisTemplate.opsForValue().set(pathKey, path);
             // 保存分片序号
             redisTemplate.opsForValue().set(uploadedNoKey, "1");
-        }else{
+        } else {
             // 断点上传后续分片
             String filePath = redisTemplate.opsForValue().get(pathKey);
-            if(StringUtil.isNullOrEmpty(filePath)){
+            if (StringUtil.isNullOrEmpty(filePath)) {
                 throw new CommonException("上传失败！");
             }
             this.modifyAppenderFile(file, filePath, uploadedOffset);
             redisTemplate.opsForValue().increment(uploadedNoKey);
         }
         // 修改历史上传分片文件大小，作为下次文件上传的偏移量
-        uploadedOffset  += file.getSize();
+        uploadedOffset += file.getSize();
         redisTemplate.opsForValue().set(uploadedOffsetKey, String.valueOf(uploadedOffset));
 
         //如果所有分片全部上传完毕，则清空redis里面相关的key和value，并返回文件的路径
         String uploadedNoStr = redisTemplate.opsForValue().get(uploadedNoKey);
         Integer uploadedNo = Integer.valueOf(uploadedNoStr);
         String resultPath = "";
-        if(uploadedNo.equals(totalSliceNo)){
+        if (uploadedNo.equals(totalSliceNo)) {
             resultPath = redisTemplate.opsForValue().get(pathKey);
             List<String> keyList = Arrays.asList(uploadedNoKey, pathKey, uploadedOffsetKey);
             redisTemplate.delete(keyList);
@@ -132,13 +153,13 @@ public class FastDFSUtil {
     }
 
     // 文件的分片可以由前端完成，这里是为了在后端测试分片长传的功能
-    public void convertFileToSlices(MultipartFile multipartFile) throws Exception{
+    public void convertFileToSlices(MultipartFile multipartFile) throws Exception {
         String fileExtName = this.getFileExtName(multipartFile);
         //生成临时文件，将MultipartFile转为File
         File file = this.multipartFileToFile(multipartFile);
         long fileLength = file.length();
         int count = 1;
-        for(int i = 0; i < fileLength; i += SLICE_SIZE){
+        for (int i = 0; i < fileLength; i += SLICE_SIZE) {
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r");
             randomAccessFile.seek(i);
             byte[] bytes = new byte[SLICE_SIZE];
@@ -155,7 +176,7 @@ public class FastDFSUtil {
         file.delete();
     }
 
-    public File multipartFileToFile(MultipartFile multipartFile) throws Exception{
+    public File multipartFileToFile(MultipartFile multipartFile) throws Exception {
         String originalFileName = multipartFile.getOriginalFilename();
         String[] fileName = originalFileName.split("\\.");
         File file = File.createTempFile(fileName[0], "." + fileName[1]);
@@ -164,15 +185,14 @@ public class FastDFSUtil {
     }
 
     //删除
-    public void deleteFile(String filePath){
+    public void deleteFile(String filePath) {
         fastFileStorageClient.deleteFile(filePath);
     }
 
 
-
     public void viewVideoOnlineBySlices(HttpServletRequest request,
                                         HttpServletResponse response,
-                                        String path) throws Exception{
+                                        String path) throws Exception {
         // 根据文件在文件服务器上的路径查询文件的所有信息
         FileInfo fileInfo = fastFileStorageClient.queryFileInfo(DEFAULT_GROUP, path);
         // 文件总大小
@@ -182,15 +202,15 @@ public class FastDFSUtil {
         // 获取前端请求头
         Enumeration<String> headerNames = request.getHeaderNames();
         Map<String, Object> headers = new HashMap<>();
-        while(headerNames.hasMoreElements()){
+        while (headerNames.hasMoreElements()) {
             String header = headerNames.nextElement();
             headers.put(header, request.getHeader(header));
         }
         // 用于视频分片加载的请求头数据（Range）
         String rangeStr = request.getHeader("Range");
         String[] range;
-        if(StringUtil.isNullOrEmpty(rangeStr)){
-            rangeStr = "bytes=0-" + (totalFileSize-1);
+        if (StringUtil.isNullOrEmpty(rangeStr)) {
+            rangeStr = "bytes=0-" + (totalFileSize - 1);
         }
         range = rangeStr.split("bytes=|-");
         long begin = 0;
@@ -217,20 +237,20 @@ public class FastDFSUtil {
 
     public void downLoadFile(String url, String localPath) {
         fastFileStorageClient.downloadFile(DEFAULT_GROUP, url,
-                new DownloadCallback<String>() {
-                    @Override
-                    public String recv(InputStream ins) throws IOException {
-                        File file = new File(localPath);
-                        OutputStream os = new FileOutputStream(file);
-                        int len = 0;
-                        byte[] buffer = new byte[1024];
-                        while ((len = ins.read(buffer)) != -1) {
-                            os.write(buffer, 0, len);
-                        }
-                        os.close();
-                        ins.close();
-                        return "success";
-                    }
-                });
+                                           new DownloadCallback<String>() {
+                                               @Override
+                                               public String recv(InputStream ins) throws IOException {
+                                                   File file = new File(localPath);
+                                                   OutputStream os = new FileOutputStream(file);
+                                                   int len = 0;
+                                                   byte[] buffer = new byte[1024];
+                                                   while ((len = ins.read(buffer)) != -1) {
+                                                       os.write(buffer, 0, len);
+                                                   }
+                                                   os.close();
+                                                   ins.close();
+                                                   return "success";
+                                               }
+                                           });
     }
 }

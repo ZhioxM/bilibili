@@ -4,7 +4,7 @@ import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.domain.VideoCollection;
 import com.zx.bilibili.domain.VideoCollectionExample;
 import com.zx.bilibili.mapper.VideoCollectionMapper;
-import com.zx.bilibili.service.VideoCollectionService;
+import com.zx.bilibili.service.CollectService;
 import com.zx.bilibili.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @Author: Mzx
  * @Date: 2022/12/26 17:54
  */
-public class VideoCollectionServiceImpl implements VideoCollectionService {
+public class CollectServiceImpl implements CollectService {
     @Autowired
     private VideoCollectionMapper videoCollectionMapper;
 

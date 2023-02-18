@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.zx.bilibili.domain.UserCoin;
 import com.zx.bilibili.domain.UserCoinExample;
 import com.zx.bilibili.mapper.UserCoinMapper;
-import com.zx.bilibili.service.UserCoinService;
+import com.zx.bilibili.service.CoinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +16,13 @@ import java.util.List;
  * @Date: 2022/12/25 19:31
  */
 @Service
-public class UserCoinServiceImpl implements UserCoinService {
+public class CoinServiceImpl implements CoinService {
 
     @Autowired
     private UserCoinMapper userCoinMapper;
 
     @Override
-    public void addUserCoin(Long userId, Integer amount) {
+    public void addCoin(Long userId, Integer amount) {
         UserCoin userCoin = new UserCoin();
         userCoin.setUserId(userId);
         userCoin.setAmount(amount);
@@ -31,7 +31,7 @@ public class UserCoinServiceImpl implements UserCoinService {
     }
 
     @Override
-    public void updateUserCoin(Long userId, Integer amount) {
+    public void updateCoin(Long userId, Integer amount) {
         UserCoinExample userCoinExample = new UserCoinExample();
         userCoinExample.createCriteria().andUserIdEqualTo(userId);
         UserCoin userCoin = new UserCoin();
@@ -41,7 +41,7 @@ public class UserCoinServiceImpl implements UserCoinService {
     }
 
     @Override
-    public UserCoin getUserCoin(Long userId) {
+    public UserCoin getCoin(Long userId) {
         UserCoinExample userCoinExample = new UserCoinExample();
         userCoinExample.createCriteria().andUserIdEqualTo(userId);
         List<UserCoin> db = userCoinMapper.selectByExample(userCoinExample);

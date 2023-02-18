@@ -8,8 +8,8 @@ import com.zx.bilibili.common.api.CommonResult;
 import com.zx.bilibili.domain.CollectionGroup;
 import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.domain.VideoCollection;
+import com.zx.bilibili.service.CollectService;
 import com.zx.bilibili.service.CollectionFolderService;
-import com.zx.bilibili.service.VideoCollectionService;
 import com.zx.bilibili.service.VideoService;
 import com.zx.bilibili.vo.CollectionGroupVo;
 import com.zx.bilibili.vo.VideoCollectionFolderVo;
@@ -27,7 +27,7 @@ import static com.zx.bilibili.constant.VideoSortConstants.*;
  * @Author: Mzx
  * @Date: 2022/12/26 17:28
  */
-public class VideoCollectionController {
+public class CollectController {
     @Autowired
     private CollectionFolderService collectionFolderService;
 
@@ -35,7 +35,7 @@ public class VideoCollectionController {
     private VideoService videoService;
 
     @Autowired
-    private VideoCollectionService videoCollectionService;
+    private CollectService collectService;
 
 
     @ApiOperation("查询用户收藏夹")

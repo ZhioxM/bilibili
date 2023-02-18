@@ -8,7 +8,7 @@ import com.zx.bilibili.domain.Video;
 import com.zx.bilibili.domain.VideoComment;
 import com.zx.bilibili.domain.VideoCommentExample;
 import com.zx.bilibili.mapper.VideoCommentMapper;
-import com.zx.bilibili.service.VideoCommentService;
+import com.zx.bilibili.service.ReplyService;
 import com.zx.bilibili.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.List;
  * @Date: 2022/12/26 14:30
  */
 @Service
-public class VideoCommentServiceImpl implements VideoCommentService {
+public class ReplyServiceImpl implements ReplyService {
     @Autowired
     private VideoCommentMapper videoCommentMapper;
 

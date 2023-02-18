@@ -10,7 +10,7 @@ import com.zx.bilibili.domain.UserFollowing;
 import com.zx.bilibili.domain.UserFollowingExample;
 import com.zx.bilibili.mapper.UserFollowingMapper;
 import com.zx.bilibili.service.FollowingGroupService;
-import com.zx.bilibili.service.UserFollowingService;
+import com.zx.bilibili.service.FollowingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +23,7 @@ import java.util.List;
  * @Date: 2022/12/18 20:05
  */
 @Service
-public class UserFollowingServiceImpl implements UserFollowingService {
+public class FollowingServiceImpl implements FollowingService {
     @Autowired
     private UserFollowingMapper userFollowingMapper;
 

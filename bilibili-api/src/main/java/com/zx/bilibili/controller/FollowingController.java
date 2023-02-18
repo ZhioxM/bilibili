@@ -9,7 +9,7 @@ import com.zx.bilibili.domain.FollowingGroup;
 import com.zx.bilibili.domain.UserFollowing;
 import com.zx.bilibili.domain.UserInfo;
 import com.zx.bilibili.service.FollowingGroupService;
-import com.zx.bilibili.service.UserFollowingService;
+import com.zx.bilibili.service.FollowingService;
 import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.vo.UserFollowedVo;
 import com.zx.bilibili.vo.UserFollowingVo;
@@ -33,10 +33,10 @@ import java.util.stream.Collectors;
  * @Date: 2022/12/20 15:42
  */
 @RestController
-public class UserFollowingController {
+public class FollowingController {
 
     @Autowired
-    private UserFollowingService userFollowingService;
+    private FollowingService followingService;
 
     @Autowired
     private FollowingGroupService followingGroupService;
@@ -50,7 +50,7 @@ public class UserFollowingController {
     public CommonResult<String> addUserFollowings(@RequestBody UserFollowing userFollowing){
         Long userId = StpUtil.getLoginIdAsLong();
         userFollowing.setUserId(userId);
-        userFollowingService.addUserFollowing(userFollowing);
+        followingService.addUserFollowing(userFollowing);
         return CommonResult.success(null);
     }
 
@@ -60,7 +60,7 @@ public class UserFollowingController {
     public CommonResult<List<UserFollowingVo>> getUserFollowings() {
         List<UserFollowingVo> result = new ArrayList<>();
         Long userId = StpUtil.getLoginIdAsLong();
-        List<UserFollowing> userFollowingList = userFollowingService.getUserFollowing(userId);
+        List<UserFollowing> userFollowingList = followingService.getUserFollowing(userId);
         // 获取关注ID列表
         Set<Long> followingIdSet = userFollowingList.stream().map(UserFollowing::getFollowingId).collect(Collectors.toSet());
         // 所有关注的用户信息
@@ -103,7 +103,7 @@ public class UserFollowingController {
     public CommonResult<List<UserFollowedVo>> getUserFollowed() {
         List<UserFollowedVo> result = new ArrayList<>();
         Long userId = StpUtil.getLoginIdAsLong();
-        List<UserFollowing> followedList = userFollowingService.getUserFollowed(userId);
+        List<UserFollowing> followedList = followingService.getUserFollowed(userId);
         // 获取粉丝ID
         Set<Long> followedIdSet = followedList.stream().map(UserFollowing::getUserId).collect(Collectors.toSet());
         for (Long followedId : followedIdSet) {
@@ -112,7 +112,7 @@ public class UserFollowingController {
             // 查询粉丝信息
             UserInfo userInfo = userService.getUserInfo(followedId);
             // 判断自己有没有回关这位粉丝
-            UserFollowing db = userFollowingService.getUserFollowed(userId, followedId);
+            UserFollowing db = followingService.getUserFollowed(userId, followedId);
             boolean followed = ObjUtil.isNotEmpty(db);
             UserInfoVo userInfoVo = new UserInfoVo(
                     userInfo.getId(),

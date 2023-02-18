@@ -9,7 +9,7 @@ import com.zx.bilibili.common.api.CommonException;
 import com.zx.bilibili.constant.VideoAreaConstant;
 import com.zx.bilibili.domain.*;
 import com.zx.bilibili.mapper.*;
-import com.zx.bilibili.service.UserCoinService;
+import com.zx.bilibili.service.CoinService;
 import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.service.VideoService;
 import com.zx.bilibili.service.VideoTagService;
@@ -60,7 +60,7 @@ public class VideoServiceImpl implements VideoService {
     private UserService userService;
 
     @Autowired
-    private UserCoinService userCoinService;
+    private CoinService coinService;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
@@ -228,7 +228,7 @@ public class VideoServiceImpl implements VideoService {
             throw new CommonException("非法视频");
         }
 
-        UserCoin userCoin = userCoinService.getUserCoin(userId);
+        UserCoin userCoin = coinService.getCoin(userId);
         if (userCoin.getAmount() < amount) {
             throw new CommonException("硬币数不足");
         }
@@ -255,7 +255,7 @@ public class VideoServiceImpl implements VideoService {
                         videoCoinMapper.updateByPrimaryKeySelective(finalDb);
                     }
                     // 更新用户硬币数
-                    userCoinService.updateUserCoin(userId, userCoin.getAmount() - amount);
+                    coinService.updateCoin(userId, userCoin.getAmount() - amount);
                 } catch (Exception e) {
                     transactionStatus.setRollbackOnly();
                     e.printStackTrace();

@@ -8,7 +8,7 @@ import com.zx.bilibili.common.api.CommonResult;
 import com.zx.bilibili.domain.User;
 import com.zx.bilibili.domain.UserFollowing;
 import com.zx.bilibili.domain.UserInfo;
-import com.zx.bilibili.service.UserFollowingService;
+import com.zx.bilibili.service.FollowingService;
 import com.zx.bilibili.service.UserService;
 import com.zx.bilibili.util.RSAUtil;
 import com.zx.bilibili.vo.UserInfoVo;
@@ -34,7 +34,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private UserFollowingService userFollowingService;
+    private FollowingService followingService;
 
     @ApiOperation("获取公钥，用于前端RSA加密(对密码进行加密)")
     @GetMapping("/rsa-pks")
@@ -103,7 +103,7 @@ public class UserController {
                                                                 String nick){
         Long userId = StpUtil.getLoginIdAsLong();
         List<UserInfo> userInfoList = userService.listUserInfo(pageNum, pageSize, nick);
-        Set<Long> followingId = userFollowingService.getUserFollowing(userId).stream().map(UserFollowing::getFollowingId).collect(Collectors.toSet());
+        Set<Long> followingId = followingService.getUserFollowing(userId).stream().map(UserFollowing::getFollowingId).collect(Collectors.toSet());
         List<UserInfoVo> userInfoVoList = userInfoList.stream().map((o) -> {
             // 判断是否回关(TODO 优化，可以先一次将用户的关注列表全部查出来，再判断是当前用户有没有关注过这位用户)
             // UserFollowing db = userFollowingService.getUserFollowed(userId, o.getUserId());

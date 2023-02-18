@@ -5,18 +5,20 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjUtil;
 import com.zx.bilibili.common.api.CommonResult;
 import com.zx.bilibili.domain.VideoCoin;
+import com.zx.bilibili.service.CoinService;
 import com.zx.bilibili.service.VideoService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+@RestController
 public class CoinController {
 
     @Autowired
     private VideoService videoService;
+
+    @Autowired
+    private CoinService coinService;
 
     @ApiOperation("视频投币")
     @SaCheckLogin
@@ -31,7 +33,7 @@ public class CoinController {
     @ApiOperation("查询视频的投币数")
     @GetMapping("/video/coin")
     public CommonResult getVideoCoinAmount(@RequestParam Long videoId) {
-        int amount = videoService.queryVideoCoinAmount(videoId);
+        int amount = coinService.queryVideoCoinAmount(videoId);
         return CommonResult.success(amount);
     }
 

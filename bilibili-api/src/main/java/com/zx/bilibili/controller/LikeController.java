@@ -4,7 +4,7 @@ package com.zx.bilibili.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import com.zx.bilibili.common.api.CommonResult;
-import com.zx.bilibili.service.VideoService;
+import com.zx.bilibili.service.LikeService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class LikeController {
 
     @Autowired
-    private VideoService videoService;
+    private LikeService likeService;
 
 
     @ApiOperation("视频点赞")
@@ -21,7 +21,7 @@ public class LikeController {
     @PostMapping("/video/like/{videoId}")
     public CommonResult likeVideo(@PathVariable Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
-        videoService.likeVideo(userId, videoId);
+        likeService.likeVideo(userId, videoId);
         return CommonResult.success(null);
     }
 
@@ -30,14 +30,14 @@ public class LikeController {
     @DeleteMapping("/vedio/like/{videoId}")
     public CommonResult unlikeVideo(@PathVariable Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
-        videoService.unlikeVideo(userId, videoId);
+        likeService.unlikeVideo(userId, videoId);
         return CommonResult.success(null);
     }
 
     @ApiOperation("获取视频点赞数")
     @GetMapping("/video/likes/{videoId")
     public CommonResult videoLikes(@PathVariable Long videoId) {
-        int count = videoService.likeCount(videoId);
+        int count = likeService.likeCount(videoId);
         return CommonResult.success(count);
     }
 
@@ -46,7 +46,7 @@ public class LikeController {
     @GetMapping("/video/like/{videoId")
     public CommonResult videoLike(@PathVariable Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
-        boolean i = videoService.likeStatus(userId, videoId);
+        boolean i = likeService.likeStatus(userId, videoId);
         return CommonResult.success(i);
     }
 }

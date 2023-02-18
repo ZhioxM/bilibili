@@ -17,7 +17,7 @@
     <modules>
         <module>bilibili-api</module>
         <module>bilibili-service</module>
-        <module>bilibili-dao</module>
+        <module>bilibili-mbg</module>
         <module>bilibili-common</module>
     </modules>
 

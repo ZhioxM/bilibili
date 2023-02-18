@@ -3,7 +3,10 @@ package com.zx.bilibili.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import com.zx.bilibili.domain.UserCoin;
 import com.zx.bilibili.domain.UserCoinExample;
+import com.zx.bilibili.domain.VideoCoin;
+import com.zx.bilibili.domain.VideoCoinExample;
 import com.zx.bilibili.mapper.UserCoinMapper;
+import com.zx.bilibili.mapper.VideoCoinMapper;
 import com.zx.bilibili.service.CoinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,9 @@ public class CoinServiceImpl implements CoinService {
 
     @Autowired
     private UserCoinMapper userCoinMapper;
+
+    @Autowired
+    private VideoCoinMapper videoCoinMapper;
 
     @Override
     public void addCoin(Long userId, Integer amount) {
@@ -49,5 +55,17 @@ public class CoinServiceImpl implements CoinService {
             return null;
         }
         return db.get(0);
+    }
+
+    @Override
+    public int queryVideoCoinAmount(Long videoId) {
+        VideoCoinExample videoCoinExample = new VideoCoinExample();
+        videoCoinExample.createCriteria().andVideoIdEqualTo(videoId);
+        List<VideoCoin> videoCoins = videoCoinMapper.selectByExample(videoCoinExample);
+        int amount = 0;
+        for (VideoCoin coin : videoCoins) {
+            amount += coin.getAmount();
+        }
+        return amount;
     }
 }

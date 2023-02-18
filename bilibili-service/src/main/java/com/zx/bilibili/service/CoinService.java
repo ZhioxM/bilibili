@@ -12,4 +12,6 @@ public interface CoinService {
     void updateCoin(Long userId, Integer amount);
 
     UserCoin getCoin(Long userId);
+
+    int queryVideoCoinAmount(Long videoId);
 }
